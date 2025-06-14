@@ -1,4 +1,9 @@
+import logging
+
 from utils.llm_utils import clean_text_paragraph
+
+logger = logging.getLogger("DBLogger")
+logger.setLevel(logging.DEBUG)
 
 CATEGORIES = [
     "Feature Update",
@@ -140,6 +145,12 @@ def ask_model_categorization(prompt, ollama_client, model):
     )
     answer = response['response'].split("Category:")[-1]
     return refine_answer(answer)
+
+
+def categorize(commit, idx, llama_model, ollama_client):
+    logger.debug(f"Categorizing commit {idx}")
+    prompt = generate_prompt_categorization_few_shots(commit)
+    commit['llama_category'] = ask_model_categorization(prompt, ollama_client, llama_model)
 
 # def ask_model_categorization(prompt, pipe):
 #     """

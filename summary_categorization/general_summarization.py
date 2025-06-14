@@ -1,4 +1,12 @@
+import logging
+
+from langchain_core.documents import Document
+
+from utils.chromadb_utils import retrieve_top_commits_from_chromadb, format_retrieved_docs
 from utils.llm_utils import clean_text_paragraph
+
+logger = logging.getLogger("DBLogger")
+logger.setLevel(logging.DEBUG)
 
 
 def generate_prompt_summarization_few_shots(commit):
@@ -130,6 +138,19 @@ def ask_model_summarization(prompt, ollama_client, model):
     )
     answer = response['response'].split("Answer:")[-1]
     return answer
+
+def generate_general_summary(commit, idx, llama_model, ollama_client) -> list[tuple[Document, float]]:
+    logger.debug(f"Summarizing (General) commit {idx}")
+    prompt = generate_prompt_summarization_few_shots(commit)
+    summary_retrieved_docs: list[tuple[Document, float]] = retrieve_top_commits_from_chromadb(prompt, n_results=3)
+    if summary_retrieved_docs:
+        logger.debug(
+            f"Retrieved {len(summary_retrieved_docs)} docs for commit {idx}: {''.join(format_retrieved_docs(summary_retrieved_docs))}")
+        prompt += "\n\nPrevious similar commits:\n" + "\n".join([doc[0].page_content for doc in summary_retrieved_docs])
+    else:
+        logger.debug(f"No similar commits found for commit {idx}")
+    commit['llama_summary'] = ask_model_summarization(prompt, ollama_client, llama_model)
+    return summary_retrieved_docs
 
 
 

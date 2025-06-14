@@ -13,13 +13,16 @@ from langchain_core.documents import Document
 from tqdm import tqdm
 import ollama
 
-from summary_categorization.categorization import generate_prompt_categorization_few_shots, ask_model_categorization
+from summary_categorization.categorization import generate_prompt_categorization_few_shots, ask_model_categorization, \
+    categorize
+from summary_categorization.technical_summarization import generate_technical_report
 from utils.chromadb_utils import save_commit_to_chromadb, retrieve_top_commits_from_chromadb, format_retrieved_docs
 #from huggingface_hub import login
 #import matplotlib.pyplot as plt
 
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
-from summary_categorization.general_summarization import generate_prompt_summarization_few_shots, ask_model_summarization
+from summary_categorization.general_summarization import generate_prompt_summarization_few_shots, \
+    ask_model_summarization, generate_general_summary
 from utils.git_utils import extract_git_commits
 from utils.logging_handler import SQLiteHandler
 from utils.file_utils import load_commits, save_commits, full_path
@@ -88,24 +91,17 @@ def main():
         # Run summarization and classification only on unprocessed commits
         # Categorization
         if not commit['llama_category']:
-            logger.debug(f"Categorizing commit {idx}")
-            prompt = generate_prompt_categorization_few_shots(commit)
-            commit['llama_category'] = ask_model_categorization(prompt, ollama_client, llama_model)
+            categorize(commit, idx, llama_model, ollama_client)
 
         # General summary
-        if not commit['llama_summary'] and i < 100:
-            logger.debug(f"Summarizing commit {idx}")
-            prompt = generate_prompt_summarization_few_shots(commit)
-            summary_retrieved_docs: list[tuple[Document, float]] = retrieve_top_commits_from_chromadb(prompt, n_results=3)
-            if summary_retrieved_docs:
-                logger.debug(f"Retrieved {len(summary_retrieved_docs)} docs for commit {idx}: {''.join(format_retrieved_docs(summary_retrieved_docs))}")
-                prompt += "\n\nPrevious similar commits:\n" + "\n".join([doc[0].page_content for doc in summary_retrieved_docs])
-            else:
-                logger.debug(f"No similar commits found for commit {idx}")
-            commit['llama_summary'] = ask_model_summarization(prompt, ollama_client, llama_model)
+        if not commit['llama_summary'] and i < 100: # todo: remove this condition for the final version
+            summary_retrieved_docs = generate_general_summary(commit, idx, llama_model, ollama_client)
 
         # Technical summary
-        if not commit['llama_tech_summary']:
+        if not commit['llama_tech_summary'] and i < 100: # todo: remove this condition for the final version
+            # logger.debug(f"Summarizing (Technical) commit {idx}")
+            # prompt = generate_prompt_summarization_few_shots(commit, technical=True)
+            # commit['llama_tech_summary'] = generate_technical_report(commit)
             pass
 
         # save summaries and categories
@@ -134,6 +130,8 @@ def main():
     print(f"Recall: {r}")
     print(f"Accuracy: {a}")
     pass
+
+
 
 
 if __name__ == "__main__":
