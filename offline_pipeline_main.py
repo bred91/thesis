@@ -109,12 +109,21 @@ def main():
             pass
 
         # save summaries and categories
-        save_commits(commits_few_shots, full_path(current_directory  + '/' + commits_folder, "few_shots"))
-        save_summaries_to_sqlite(idx, "test1", datetime.datetime.now(), commit['llama_category'],
-                                 commit['llama_summary'], summary_retrieved_docs,
-                                 '',#commit['tech_summary'],
-                                 tech_summary_retrieved_docs)
-        save_commit_to_chromadb(commit, idx)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(save_commits, commits_few_shots,
+                                       full_path(current_directory + '/' + commits_folder, "few_shots")),
+                       executor.submit(save_summaries_to_sqlite, idx, "test1", datetime.datetime.now(),
+                                       commit['llama_category'],
+                                       commit['llama_summary'], summary_retrieved_docs, '',
+                                       tech_summary_retrieved_docs),
+                       executor.submit(save_commit_to_chromadb, commit, idx)]
+            concurrent.futures.wait(futures)
+        # save_commits(commits_few_shots, full_path(current_directory  + '/' + commits_folder, "few_shots"))
+        # save_summaries_to_sqlite(idx, "test1", datetime.datetime.now(), commit['llama_category'],
+        #                          commit['llama_summary'], summary_retrieved_docs,
+        #                          '',#commit['tech_summary'],
+        #                          tech_summary_retrieved_docs)
+        # save_commit_to_chromadb(commit, idx)
 
     plot_categories(commits_few_shots, "few_shots")
     plot_categories_pie_chart(commits_few_shots, "few_shots")
