@@ -28,8 +28,12 @@ CREATE TABLE IF NOT EXISTS summaries (
     llama_category TEXT,
     llama_summary TEXT,
     llama_summary_retrieved_docs TEXT,
+    llama_summary_retrieved_docs_count INTEGER,
+    llama_summary_retrieved_docs_scores TEXT,
     llama_tech_summary TEXT,
     llama_tech_summary_retrieved_docs TEXT,
+    llama_tech_summary_retrieved_docs_count INTEGER,
+    llama_tech_summary_retrieved_docs_scores TEXT,
     
     FOREIGN KEY (commit_id) REFERENCES commits(id)
 )
