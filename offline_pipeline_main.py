@@ -22,7 +22,7 @@ from utils.commit_utils import filter_trivial_commits, normalize_commit_data
 from summary_categorization.general_summarization import generate_prompt_summarization_few_shots, ask_model_summarization
 from utils.git_utils import extract_git_commits
 from utils.logging_handler import SQLiteHandler
-from utils.os_utils import load_commits, save_commits, full_path
+from utils.file_utils import load_commits, save_commits, full_path
 from utils.plot_utils import plot_categories, plot_categories_pie_chart
 from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite
 from utils.validation_utils import calculate_precision_recall_categorization, ground_truth_array
