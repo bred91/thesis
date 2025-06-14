@@ -23,8 +23,8 @@ def save_commits_to_sqlite(commits):
             commit.get("author", ""),
             commit.get("date", "").strftime('%Y-%m-%d %H:%M:%S') if isinstance(commit.get("date"), datetime) else commit.get("date", ""),
             commit.get("message", ""),
-            commit.get("files", ""),
-            commit.get("diffs", "")
+            json.dumps(commit['files']),
+            json.dumps(commit['diffs'])
         ) for commit in commits.values()
     ])
 
@@ -51,9 +51,11 @@ def save_summaries_to_sqlite(
         cursor.execute(
             """
             INSERT INTO summaries (commit_id, experiment_name, date, llama_category, llama_summary, 
-                                   llama_summary_retrieved_docs, llama_tech_summary, 
-                                   llama_tech_summary_retrieved_docs) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                                   llama_summary_retrieved_docs, llama_summary_retrieved_docs_count, 
+                                   llama_summary_retrieved_docs_scores, llama_tech_summary,                                 
+                                   llama_tech_summary_retrieved_docs, llama_tech_summary_retrieved_docs_count,
+                                   llama_tech_summary_retrieved_docs_scores) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 commit_id,
@@ -62,8 +64,12 @@ def save_summaries_to_sqlite(
                 llama_category,
                 llama_summary,
                 json.dumps(serialize_docs(llama_summary_retrieved_docs)),
+                len(llama_summary_retrieved_docs),
+                json.dumps([score for _, score in llama_summary_retrieved_docs]),
                 llama_tech_summary,
-                json.dumps(serialize_docs(llama_tech_summary_retrieved_docs))
+                json.dumps(serialize_docs(llama_tech_summary_retrieved_docs)),
+                len(llama_tech_summary_retrieved_docs),
+                json.dumps([score for _, score in llama_tech_summary_retrieved_docs])
             )
         )
 
@@ -72,4 +78,17 @@ def save_summaries_to_sqlite(
 
 def serialize_docs(docs):
     # Convert each Document to a dict
-    return [doc.__dict__ if hasattr(doc, '__dict__') else str(doc) for doc in docs]
+    return [doc[0].__dict__ if hasattr(doc[0], '__dict__') else str(doc[0]) for doc in docs]
+
+
+def delete_all_summaries():
+    """
+    Delete all summaries from the SQLite database and reset autoincrement ID.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM summaries")
+    cursor.execute("DELETE FROM sqlite_sequence WHERE name='summaries'")
+    conn.commit()
+    conn.close()
