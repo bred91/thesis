@@ -2,7 +2,8 @@ import logging
 
 from langchain_core.documents import Document
 
-from utils.chromadb_utils import retrieve_top_commits_from_chromadb, format_retrieved_docs
+from utils.chromadb_utils import format_retrieved_docs, retrieve_top_commits_by_summary_type
+from utils.enums import SummaryType
 from utils.llm_utils import clean_text_paragraph
 
 logger = logging.getLogger("DBLogger")
@@ -140,15 +141,32 @@ def ask_model_summarization(prompt, ollama_client, model):
     return answer
 
 def generate_general_summary(commit, idx, llama_model, ollama_client) -> list[tuple[Document, float]]:
+    """
+    Generate a general summary for a git commit using the LLM.
+    This function retrieves similar commits from the database and uses them to enhance the summary generation.
+
+    Args:
+        commit (dict): The commit data containing information like hash, author, date, message, files, and diffs.
+        idx (int): The index of the commit in the dataset.
+        llama_model (str): The name of the LLM model to use for summarization.
+        ollama_client: The Ollama client instance for interacting with the model.
+
+    Returns:
+        list[tuple[Document, float]]: A list of tuples containing retrieved documents and their relevance scores.
+    """
+
     logger.debug(f"Summarizing (General) commit {idx}")
     prompt = generate_prompt_summarization_few_shots(commit)
-    summary_retrieved_docs: list[tuple[Document, float]] = retrieve_top_commits_from_chromadb(prompt, n_results=3)
+    summary_retrieved_docs: list[tuple[Document, float]] = (
+        retrieve_top_commits_by_summary_type(prompt, SummaryType.GENERAL, n_results=3))
+
     if summary_retrieved_docs:
         logger.debug(
             f"Retrieved {len(summary_retrieved_docs)} docs for commit {idx}: {''.join(format_retrieved_docs(summary_retrieved_docs))}")
         prompt += "\n\nPrevious similar commits:\n" + "\n".join([doc[0].page_content for doc in summary_retrieved_docs])
     else:
         logger.debug(f"No similar commits found for commit {idx}")
+
     commit['llama_summary'] = ask_model_summarization(prompt, ollama_client, llama_model)
     return summary_retrieved_docs
 

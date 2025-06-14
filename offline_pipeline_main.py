@@ -15,19 +15,20 @@ import ollama
 
 from summary_categorization.categorization import generate_prompt_categorization_few_shots, ask_model_categorization, \
     categorize
-from summary_categorization.technical_summarization import generate_technical_report
-from utils.chromadb_utils import save_commit_to_chromadb, retrieve_top_commits_from_chromadb, format_retrieved_docs
+from summary_categorization.technical_summarization import generate_technical_report, generate_technical_summary
+from utils.chromadb_utils import save_commit_to_chromadb, format_retrieved_docs, delete_all_documents
 #from huggingface_hub import login
 #import matplotlib.pyplot as plt
 
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
 from summary_categorization.general_summarization import generate_prompt_summarization_few_shots, \
     ask_model_summarization, generate_general_summary
+from utils.enums import SummaryType
 from utils.git_utils import extract_git_commits
 from utils.logging_handler import SQLiteHandler
 from utils.file_utils import load_commits, save_commits, full_path
 from utils.plot_utils import plot_categories, plot_categories_pie_chart
-from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite
+from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite, delete_all_summaries
 from utils.validation_utils import calculate_precision_recall_categorization, ground_truth_array
 
 torch.manual_seed(42) #set_seed(42) # Ensure reproducibility
@@ -82,6 +83,9 @@ def main():
     if commits_few_shots is None:
         commits_few_shots = copy.deepcopy(commits)
 
+    delete_all_summaries()
+    delete_all_documents()
+
     for i, (idx, commit) in tqdm(enumerate(commits_few_shots.items())):
 
         # Initialize fields if not present
@@ -99,27 +103,29 @@ def main():
 
         # Technical summary
         if not commit['llama_tech_summary'] and i < 100: # todo: remove this condition for the final version
-            # logger.debug(f"Summarizing (Technical) commit {idx}")
-            # prompt = generate_prompt_summarization_few_shots(commit, technical=True)
-            # commit['llama_tech_summary'] = generate_technical_report(commit)
+            tech_summary_retrieved_docs = generate_technical_summary(commit, idx, llama_model, ollama_client)
             pass
 
         # save summaries and categories
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            futures = [executor.submit(save_commits, commits_few_shots,
-                                       full_path(current_directory + '/' + commits_folder, "few_shots")),
-                       executor.submit(save_summaries_to_sqlite, idx, "test1", datetime.datetime.now(),
-                                       commit['llama_category'],
-                                       commit['llama_summary'], summary_retrieved_docs, '',
-                                       tech_summary_retrieved_docs),
-                       executor.submit(save_commit_to_chromadb, commit, idx)]
+            futures = [
+                executor.submit(save_commits, commits_few_shots,
+                                full_path(current_directory + '/' + commits_folder, "few_shots")),
+                executor.submit(save_summaries_to_sqlite, idx, "test1", datetime.datetime.now(),
+                                commit['llama_category'],
+                                commit['llama_summary'], summary_retrieved_docs,
+                                commit['llama_tech_summary'], tech_summary_retrieved_docs),
+                executor.submit(save_commit_to_chromadb, commit, idx, SummaryType.GENERAL),
+                executor.submit(save_commit_to_chromadb, commit, idx, SummaryType.TECHNICAL)
+            ]
             concurrent.futures.wait(futures)
         # save_commits(commits_few_shots, full_path(current_directory  + '/' + commits_folder, "few_shots"))
         # save_summaries_to_sqlite(idx, "test1", datetime.datetime.now(), commit['llama_category'],
         #                          commit['llama_summary'], summary_retrieved_docs,
-        #                          '',#commit['tech_summary'],
+        #                          commit['tech_summary'],
         #                          tech_summary_retrieved_docs)
-        # save_commit_to_chromadb(commit, idx)
+        # save_commit_to_chromadb(commit, idx, SummaryType.GENERAL)
+        # save_commit_to_chromadb(commit, idx, SummaryType.TECHNICAL)
 
     plot_categories(commits_few_shots, "few_shots")
     plot_categories_pie_chart(commits_few_shots, "few_shots")
