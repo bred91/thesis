@@ -1,39 +1,30 @@
 import concurrent.futures
+import copy
 import datetime
+import logging
 import os
 import subprocess
-import torch
-import copy
 
-import logging
-
-from langchain_core.documents import Document
-
-#from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM, set_seed
-from tqdm import tqdm
 import ollama
+import torch
+from langchain_core.documents import Document
+from tqdm import tqdm
 
-from summary_categorization.categorization import generate_prompt_categorization_few_shots, ask_model_categorization, \
-    categorize
-from summary_categorization.technical_summarization import generate_technical_report, generate_technical_summary
-from utils.chromadb_utils import save_commit_to_chromadb, format_retrieved_docs, delete_all_documents
-#from huggingface_hub import login
-#import matplotlib.pyplot as plt
-
+from summary_categorization.categorization import categorize
+from summary_categorization.general_summarization import generate_general_summary
+from summary_categorization.technical_summarization import generate_technical_summary
+from utils.chromadb_utils import save_commit_to_chromadb, delete_all_documents
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
-from summary_categorization.general_summarization import generate_prompt_summarization_few_shots, \
-    ask_model_summarization, generate_general_summary
 from utils.enums import SummaryType
+from utils.file_utils import load_commits, save_commits, full_path
 from utils.git_utils import extract_git_commits
 from utils.logging_handler import SQLiteHandler
-from utils.file_utils import load_commits, save_commits, full_path
 from utils.plot_utils import plot_categories, plot_categories_pie_chart
 from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite, delete_all_summaries
 from utils.validation_utils import calculate_precision_recall_categorization, ground_truth_array
 
-torch.manual_seed(42) #set_seed(42) # Ensure reproducibility
+torch.manual_seed(42)
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 current_directory = os.getcwd()
 
 logger = logging.getLogger("DBLogger")
@@ -47,13 +38,11 @@ db_handler.setFormatter(formatter)
 logger.addHandler(db_handler)
 
 def main():
-    #device_used = 0 if torch.cuda.is_available() else -1
     remote_path = 'https://github.com/ccxvii/mujs.git'
     local_path = './mujs'
     #pipe_llama = pipeline("text-generation", model="meta-llama/Llama-3.1-8B-Instruct", pad_token_id=128001, device = device_used )
     ollama_client = ollama.Client(host='http://localhost:11434')
     llama_model = 'llama3.1:8b-instruct-q8_0'
-
 
     # Avoid warning related to parallelization
     os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -62,14 +51,12 @@ def main():
       subprocess.run(["git", "clone", remote_path, local_path], check=True) #!git clone {remote_path}
 
     data_filepath_raw_data = 'commits_raw.pkl'##### Open the right file   #### DELETE AT MOST USING ONLY RAW DATA
-    #data_filepath_zero_shot = 'commits_zero_shot.pkl'##### Open the right file   #### DELETE AT MOST USING ONLY RAW DATA
     data_filepath_few_shots = 'commits_few_shots.pkl'##### Open the right file   #### DELETE AT MOST USING ONLY RAW DATA
     commits_folder = 'commits'
 
-    commits = load_commits(commits_folder + '/' + data_filepath_raw_data) # To resume experiments
-    #commits_zero_shot = load_commits(data_filepath_zero_shot) # To resume experiments
-    commits_few_shots = load_commits(data_filepath_few_shots) # To resume experiments
-
+    # To resume experiments
+    commits = load_commits(commits_folder + '/' + data_filepath_raw_data)
+    commits_few_shots = load_commits(data_filepath_few_shots)
 
     if commits is None: # If there are no checkpoints, initialize commits extraction
         commits = extract_git_commits(local_path)     # Extract commits from repository
