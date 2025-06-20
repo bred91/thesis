@@ -15,6 +15,7 @@ from summary_categorization.general_summarization import generate_general_summar
 from summary_categorization.technical_summarization import generate_technical_summary
 from utils.chromadb_utils import save_commit_to_chromadb, delete_all_documents
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
+from utils.config import SQL_PERSIST_DIR, MUJS_REMOTE_URL, MUJS_LOCAL_PATH, OLLAMA_CLIENT_HOST, MODEL_NAME, SEED
 from utils.enums import SummaryType
 from utils.file_utils import load_commits, save_commits, full_path
 from utils.git_utils import extract_git_commits
@@ -23,14 +24,14 @@ from utils.plot_utils import plot_categories, plot_categories_pie_chart
 from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite, delete_all_summaries
 from utils.validation_utils import calculate_precision_recall_categorization, ground_truth_array
 
-torch.manual_seed(42)
+torch.manual_seed(SEED)
 
 current_directory = os.getcwd()
 
 logger = logging.getLogger("DBLogger")
 logger.setLevel(logging.DEBUG)
 
-db_handler = SQLiteHandler("db_sqllite/sqlite.db")
+db_handler = SQLiteHandler(SQL_PERSIST_DIR)
 
 formatter = logging.Formatter('%(message)s')
 db_handler.setFormatter(formatter)
@@ -38,10 +39,10 @@ db_handler.setFormatter(formatter)
 logger.addHandler(db_handler)
 
 def main():
-    remote_path = 'https://github.com/ccxvii/mujs.git'
-    local_path = './mujs'
-    ollama_client = ollama.Client(host='http://localhost:11434')
-    llama_model = 'llama3.1:8b-instruct-q8_0'
+    remote_path = MUJS_REMOTE_URL
+    local_path = MUJS_LOCAL_PATH
+    ollama_client = ollama.Client(host=OLLAMA_CLIENT_HOST)
+    llama_model = MODEL_NAME
 
     # Avoid warning related to parallelization
     os.environ["TOKENIZERS_PARALLELISM"] = "false"

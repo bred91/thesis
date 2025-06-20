@@ -9,31 +9,34 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
 
+from utils.config import MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
+    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA
+
 # -------------------- LLM & Embeddings --------------------
 llm = ChatOllama(
-    model="llama3.1:8b-instruct-q8_0",
-    num_ctx=32768,
+    model=MODEL_NAME,
+    num_ctx=NUM_CTX,
     temperature=0.0
 )
 
-embeddings = OllamaEmbeddings(model="nomic-embed-text")
+embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
 
 # -------------------- Vector Stores --------------------
 # Commits (summaries, code diffs & messages)
 commit_store = Chroma(
-    collection_name="commits",
+    collection_name=COMMITS_COLLECTION_NAME,
     embedding_function=embeddings,
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever_commits = commit_store.as_retriever(search_kwargs={"k": 5})
 
 # General documentation
 doc_store = Chroma(
-    collection_name="general_docs",
+    collection_name=GENERAL_DOCS_COLLECTION_NAME,
     embedding_function=embeddings,
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever_docs = doc_store.as_retriever(search_kwargs={"k": 5})
 

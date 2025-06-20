@@ -7,16 +7,19 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import OllamaEmbeddings
 from langchain_ollama.llms import OllamaLLM
 
+from utils.config import COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, MODEL_NAME, NUM_CTX, SEED, \
+    CHROMA_METADATA
+
 chroma = Chroma(
-    collection_name="commits",
-    embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_name=COMMITS_COLLECTION_NAME,
+    embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 
 # Base LLM for Q&A and document summarization
-llm_main    = OllamaLLM(model="llama3.1:8b-instruct-q8_0", temperature=0.0, num_ctx=32768, seed=40)
-llm_queries = OllamaLLM(model="llama3.1:8b-instruct-q8_0", temperature=0.3, num_ctx=32768, seed=40)
+llm_main    = OllamaLLM(model=MODEL_NAME, temperature=0.0, num_ctx=NUM_CTX, seed=SEED)
+llm_queries = OllamaLLM(model=MODEL_NAME, temperature=0.3, num_ctx=NUM_CTX, seed=SEED)
 
 # Advanced retriever with multi-query support
 # base retriever

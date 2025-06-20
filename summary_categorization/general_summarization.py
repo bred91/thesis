@@ -3,6 +3,7 @@ import logging
 from langchain_core.documents import Document
 
 from utils.chromadb_utils import format_retrieved_docs, retrieve_top_commits_by_summary_type
+from utils.config import SEED
 from utils.enums import SummaryType
 from utils.llm_utils import clean_text_paragraph
 
@@ -135,7 +136,7 @@ def ask_model_summarization(prompt, ollama_client, model):
             "num_predict": 200,      # Maximum number of tokens to generate
             "temperature": 0,
             "top_p": 1,              # Nucleus sampling: 1 = no restriction, <1 = only most probable tokens
-            "seed": 42,
+            "seed": SEED,
         }
     )
     answer = response['response'].split("Answer:")[-1]

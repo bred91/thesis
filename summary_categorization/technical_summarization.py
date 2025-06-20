@@ -4,6 +4,7 @@ import re
 from langchain_core.documents import Document
 
 from utils.chromadb_utils import format_retrieved_docs, retrieve_top_commits_by_summary_type
+from utils.config import SEED
 from utils.enums import SummaryType
 from utils.llm_utils import clean_text_paragraph
 
@@ -205,7 +206,7 @@ def ask_model_quality_assurance(prompt, ollama_client, model) -> tuple[str, str]
             "num_predict": 500,  # Increased tokens
             "temperature": 0.7,
             "top_p": None,  # Nucleus sampling: no restriction
-            "seed": 42,
+            "seed": SEED,
         })
     answer = response['response'].split("Answer:")[-1]
 

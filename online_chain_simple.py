@@ -1,23 +1,25 @@
+from langchain.chains import create_retrieval_chain
+from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.prompts import PromptTemplate
 from langchain_chroma import Chroma
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import OllamaEmbeddings
 from langchain_ollama.llms import OllamaLLM
 
-from langchain.chains import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.prompts import PromptTemplate
+from utils.config import NUM_CTX, MODEL_NAME, COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, \
+    CHROMA_METADATA
 
 # -- Vector store & retriever --------------------------------------------------
 chroma = Chroma(
-    collection_name="commits",
-    embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_name=COMMITS_COLLECTION_NAME,
+    embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever = chroma.as_retriever()
 
 # -- LLM -----------------------------------------------------------------------
-llm = OllamaLLM(model="llama3.1:8b-instruct-q8_0", num_ctx=32768, temperature=0.0)
+llm = OllamaLLM(model=MODEL_NAME, num_ctx=NUM_CTX, temperature=0.0)
 
 # -- System Prompt ---------------------------------------------------------
 SYSTEM = """

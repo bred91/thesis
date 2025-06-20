@@ -1,5 +1,6 @@
 import logging
 
+from utils.config import SEED
 from utils.llm_utils import clean_text_paragraph
 
 logger = logging.getLogger("DBLogger")
@@ -142,7 +143,7 @@ def ask_model_categorization(prompt, ollama_client, model):
             "num_predict": 20,      # Maximum number of tokens to generate
             "temperature": 0,       # Deterministic output
             "top_p": 0.8,             # Nucleus sampling: 1 = no restriction
-            "seed": 42,            # Fixed seed for reproducibility
+            "seed": SEED,            # Fixed seed for reproducibility
         },
     )
     answer = response['response'].split("Category:")[-1]

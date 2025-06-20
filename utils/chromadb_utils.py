@@ -4,13 +4,14 @@ from langchain_chroma import Chroma
 from langchain_core.documents import Document
 from langchain_ollama import OllamaEmbeddings
 
+from utils.config import EMBEDDING_MODEL, CHROMA_PERSIST_DIR, COMMITS_COLLECTION_NAME, CHROMA_METADATA
 from utils.enums import SummaryType
 
 chroma = Chroma(
-    collection_name="commits",
-    embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_name=COMMITS_COLLECTION_NAME,
+    embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 
 def save_commit_to_chromadb(commit, idx, summary_type: SummaryType):

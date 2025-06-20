@@ -1,3 +1,5 @@
+import sqlite3
+
 from langchain.agents import initialize_agent, AgentType
 from langchain.chains.llm import LLMChain
 from langchain.memory import ConversationBufferMemory
@@ -7,12 +9,14 @@ from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 from langchain_ollama import OllamaEmbeddings
-import sqlite3
+
+from utils.config import MODEL_NAME, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, SQL_PERSIST_DIR, \
+    GENERAL_DOCS_COLLECTION_NAME, NUM_CTX, CHROMA_METADATA
 
 # ---- Model and Memory ----
 ollama_llm = ChatOllama(
-    model="llama3.1:8b-instruct-q8_0",
-    num_ctx=32768,
+    model=MODEL_NAME,
+    num_ctx=NUM_CTX,
     temperature=0.0
 )
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -20,14 +24,14 @@ memory = ConversationBufferMemory(memory_key="chat_history", return_messages=Tru
 # ---- Vector Store and Retrievers ----
 # commits
 chroma_commits = Chroma(
-    collection_name="commits",
-    embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_name=COMMITS_COLLECTION_NAME,
+    embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever_commits = chroma_commits.as_retriever(search_kwargs={"k": 5})
 
-SQLITE_PATH = "./db_sqllite/sqlite.db"
+SQLITE_PATH = SQL_PERSIST_DIR
 conn   = sqlite3.connect(SQLITE_PATH)
 cursor = conn.cursor()
 
@@ -98,10 +102,10 @@ sql_chain = LLMChain(llm=ollama_llm, prompt=sql_prompt)
 
 # general docs
 chroma_docs = Chroma(
-    collection_name="general_docs",
-    embedding_function=OllamaEmbeddings(model="nomic-embed-text"),
-    collection_metadata={"hnsw:space": "cosine"},
-    persist_directory="./chromadb_v1",
+    collection_name=GENERAL_DOCS_COLLECTION_NAME,
+    embedding_function=OllamaEmbeddings(model=EMBEDDING_MODEL),
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever_docs = chroma_docs.as_retriever(search_kwargs={"k": 5})
 

@@ -2,9 +2,10 @@ import json
 import sqlite3
 from datetime import datetime
 
+from utils.config import SQL_PERSIST_DIR
 from utils.logging_handler import SQLiteHandler
 
-db_handler = SQLiteHandler("db_sqllite/sqlite.db")
+db_handler = SQLiteHandler(SQL_PERSIST_DIR)
 
 def save_commits_to_sqlite(commits):
     """
@@ -13,7 +14,7 @@ def save_commits_to_sqlite(commits):
     conn = sqlite3.connect(db_handler.db_path)
     cursor = conn.cursor()
 
-    # Bulk insert commits into the database
+    # Bulk insert of commits into the database
     cursor.executemany("""
         INSERT OR IGNORE INTO commits (commit_hash, author, date, message, files, diffs) 
         VALUES (?, ?, ?, ?, ?, ?)
