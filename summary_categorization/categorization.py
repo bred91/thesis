@@ -125,6 +125,7 @@ def refine_answer(answer):
             return category
     return "Other"
 
+
 def ask_model_categorization(prompt, ollama_client, model):
     """
     Ask the Ollama model to categorize a git commit.
@@ -141,7 +142,8 @@ def ask_model_categorization(prompt, ollama_client, model):
             "num_predict": 20,      # Maximum number of tokens to generate
             "temperature": 0,       # Deterministic output
             "top_p": 0.8,             # Nucleus sampling: 1 = no restriction
-        }
+            "seed": 42,            # Fixed seed for reproducibility
+        },
     )
     answer = response['response'].split("Category:")[-1]
     return refine_answer(answer)
@@ -151,19 +153,3 @@ def categorize(commit, idx, llama_model, ollama_client):
     logger.debug(f"Categorizing commit {idx}")
     prompt = generate_prompt_categorization_few_shots(commit)
     commit['llama_category'] = ask_model_categorization(prompt, ollama_client, llama_model)
-
-# def ask_model_categorization(prompt, pipe):
-#     """
-#     Ask the model to categorize a git commit.
-#     """
-#     answer = pipe(
-#         prompt,
-#         max_new_tokens=20,
-#         do_sample=False,
-#         temperature=None,  # Ensure deterministic output
-#         top_p=1.0
-#     )[0]['generated_text']
-#
-#     answer = answer.split("Category:")[-1]
-#     return refine_answer(answer)
-

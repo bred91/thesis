@@ -205,6 +205,7 @@ def ask_model_quality_assurance(prompt, ollama_client, model) -> tuple[str, str]
             "num_predict": 500,  # Increased tokens
             "temperature": 0.7,
             "top_p": None,  # Nucleus sampling: no restriction
+            "seed": 42,
         })
     answer = response['response'].split("Answer:")[-1]
 

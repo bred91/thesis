@@ -135,6 +135,7 @@ def ask_model_summarization(prompt, ollama_client, model):
             "num_predict": 200,      # Maximum number of tokens to generate
             "temperature": 0,
             "top_p": 1,              # Nucleus sampling: 1 = no restriction, <1 = only most probable tokens
+            "seed": 42,
         }
     )
     answer = response['response'].split("Answer:")[-1]
@@ -169,20 +170,3 @@ def generate_general_summary(commit, idx, llama_model, ollama_client) -> list[tu
 
     commit['llama_summary'] = ask_model_summarization(prompt, ollama_client, llama_model)
     return summary_retrieved_docs
-
-
-
-# def ask_model_summarization(prompt, pipe):
-#     """
-#     Ask the model to summarize a git commit.
-#     """
-#     answer = pipe(
-#         prompt,
-#         max_new_tokens=200,
-#         do_sample=False,
-#         temperature=None,
-#         top_p=None,
-#     )[0]['generated_text']
-#
-#     answer = answer.split("Answer:")[-1]
-#     return answer
