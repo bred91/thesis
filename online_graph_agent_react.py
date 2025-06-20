@@ -1,6 +1,5 @@
 import sqlite3
 
-from langchain_core.runnables import RunnableSequence
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableConfig

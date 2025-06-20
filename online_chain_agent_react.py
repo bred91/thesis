@@ -79,7 +79,7 @@ examples = "\n".join(
     f"Question: {q}\nSQL: {s}" for q, s in few_shots
 )
 
-# 3) Prompt template: translate NL → SQL (SQLite dialect) and output *only* the query
+# Prompt template: translate NL → SQL (SQLite dialect) and output *only* the query
 sql_prompt = PromptTemplate(
     input_variables=["question"],
     template=f"""{examples}
@@ -129,17 +129,16 @@ def retrieve_commits_context(query: str) -> str:
 
 def retrieve_general_context(query: str) -> str:
     """Retrieves only general project information from the MuJS documentation."""
-    # docs = retriever_docs.get_relevant_documents(query)
-    # return "\n".join(doc.page_content for doc in docs)
-    return "MUJS docs_extra non è ancora implementato."
+    docs = retriever_docs.invoke(query)
+    return "\n".join(doc.page_content for doc in docs)
 
-def nl_to_sql_commit_context(question: str) -> str:
+def nl_to_sql_commit_context(query: str) -> str:
     """
     Process a natural-language question about summaries and execute the corresponding SQL query.
     1. Convert a natural-language question into SQL via LLM.
     2. Execute the SELECT on SQLite and return the results.
     """
-    sql_query = sql_chain.run(question).strip()
+    sql_query = sql_chain.run(query).strip()
 
     # Allow only SELECT statements for safety
     if not sql_query.lower().startswith("select"):
