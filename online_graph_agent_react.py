@@ -42,7 +42,7 @@ retriever_docs = doc_store.as_retriever(search_kwargs={"k": 5})
 # -------------------- Helper --------------------
 
 def _format_commit(doc) -> str:
-    """Pretty‑print a commit document (metadata + first chunk of content)."""
+    """Formats a summary commit document to include metadata"""
     m = doc.metadata
     return (
         f"COMMIT: {m.get('commit_hash', '')}\n"
@@ -51,7 +51,7 @@ def _format_commit(doc) -> str:
         f"DATE:   {m.get('date', '')}\n"
         f"TYPE:   {m.get('type', '')}\n"
         f"MSG  : {m.get('message', '')}\n"
-        f"---\n{doc.page_content[:1_000]}"  # truncate long diffs
+        f"---\n{doc.page_content}"
     )
 
 # -------------------- Tools --------------------
