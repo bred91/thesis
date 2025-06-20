@@ -13,12 +13,12 @@ from tqdm import tqdm
 from summary_categorization.categorization import categorize
 from summary_categorization.general_summarization import generate_general_summary
 from summary_categorization.technical_summarization import generate_technical_summary
-from utils.chromadb_utils import save_commit_to_chromadb, delete_all_documents
+from utils.chromadb_utils import save_commit_to_chromadb, delete_all_documents, save_general_document_to_chromadb
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
 from utils.config import SQL_PERSIST_DIR, MUJS_REMOTE_URL, MUJS_LOCAL_PATH, OLLAMA_CLIENT_HOST, MODEL_NAME, SEED
 from utils.enums import SummaryType
 from utils.file_utils import load_commits, save_commits, full_path
-from utils.git_utils import extract_git_commits
+from utils.git_utils import extract_git_commits, extract_mujs_docs
 from utils.logging_handler import SQLiteHandler
 from utils.plot_utils import plot_categories, plot_categories_pie_chart
 from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite, delete_all_summaries
@@ -73,6 +73,12 @@ def main():
     delete_all_summaries()
     delete_all_documents()
 
+    # process general documents
+    general_docs: list[dict]  = extract_mujs_docs()
+    for i, doc in enumerate(general_docs):
+        save_general_document_to_chromadb({i: doc})
+
+    # process commits
     for i, (idx, commit) in tqdm(enumerate(commits_few_shots.items())):
         idx_plus_one = idx + 1
         # Initialize fields if not present

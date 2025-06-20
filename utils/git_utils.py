@@ -1,4 +1,11 @@
+import datetime
+import glob
+import os
+
 from git import Repo
+
+from utils.config import MUJS_DOCS_LOCAL_PATH
+
 
 def extract_git_commits(repo_path, branch='master'):
     """
@@ -50,3 +57,33 @@ def filter_diff_lines(diff_text):
         if (line.startswith('+') or line.startswith('-')) and not line.startswith('+++') and not line.startswith('---'):
             filtered_lines.append(line)
     return '\n'.join(filtered_lines)
+
+
+def extract_mujs_docs() -> list[dict]:
+    """
+    Extracts documentation from MuJS HTML files.
+    Reads all HTML files in the mujs/docs directory and extracts the text content.
+    and extracts the text content.
+
+    Returns:
+        list: A list of dictionaries containing the filename and content of each document.
+    """
+    docs = []
+    pattern = os.path.join(os.path.dirname(os.path.dirname(__file__)), MUJS_DOCS_LOCAL_PATH, '*.html')
+    abs_pattern = os.path.abspath(pattern)
+    files = glob.glob(abs_pattern)
+
+    if not files:
+        print('No HTML files found. Check MUJS_DOCS_LOCAL_PATH:', MUJS_DOCS_LOCAL_PATH)
+
+    for file in files:
+        with open(file, encoding='utf-8') as f:
+            html = f.read()
+            docs.append(
+                {
+                    'filename': os.path.basename(file),
+                    'insert_date': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                    'content': html
+                }
+            )
+    return docs

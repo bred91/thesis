@@ -16,6 +16,7 @@ SQL_PERSIST_DIR = "db_sqllite/sqlite.db"
 # MuJS
 MUJS_REMOTE_URL = 'https://github.com/ccxvii/mujs.git'
 MUJS_LOCAL_PATH = './mujs'
+MUJS_DOCS_LOCAL_PATH = './mujs/docs'
 
 # Ollama
 OLLAMA_CLIENT_HOST = 'http://localhost:11434'
