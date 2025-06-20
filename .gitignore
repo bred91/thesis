@@ -200,3 +200,4 @@ cython_debug/
 /.idea/sqldialects.xml
 /.idea/thesis.iml
 /.idea/vcs.xml
+/.idea/ai_toolkit.xml
