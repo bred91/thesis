@@ -40,7 +40,6 @@ logger.addHandler(db_handler)
 def main():
     remote_path = 'https://github.com/ccxvii/mujs.git'
     local_path = './mujs'
-    #pipe_llama = pipeline("text-generation", model="meta-llama/Llama-3.1-8B-Instruct", pad_token_id=128001, device = device_used )
     ollama_client = ollama.Client(host='http://localhost:11434')
     llama_model = 'llama3.1:8b-instruct-q8_0'
 
@@ -50,8 +49,8 @@ def main():
     if not os.path.isdir(local_path):
       subprocess.run(["git", "clone", remote_path, local_path], check=True) #!git clone {remote_path}
 
-    data_filepath_raw_data = 'commits_raw.pkl'##### Open the right file   #### DELETE AT MOST USING ONLY RAW DATA
-    data_filepath_few_shots = 'commits_few_shots.pkl'##### Open the right file   #### DELETE AT MOST USING ONLY RAW DATA
+    data_filepath_raw_data = 'commits_raw.pkl'          # raw data file with all commits
+    data_filepath_few_shots = 'commits_few_shots.pkl'   # few-shots data file
     commits_folder = 'commits'
 
     # To resume experiments
@@ -74,7 +73,7 @@ def main():
     delete_all_documents()
 
     for i, (idx, commit) in tqdm(enumerate(commits_few_shots.items())):
-
+        idx_plus_one = idx + 1
         # Initialize fields if not present
         summary_retrieved_docs: list[tuple[Document, float]] = []
         tech_summary_retrieved_docs: list[tuple[Document, float]] = []
@@ -82,28 +81,27 @@ def main():
         # Run summarization and classification only on unprocessed commits
         # Categorization
         if not commit['llama_category']:
-            categorize(commit, idx, llama_model, ollama_client)
+            categorize(commit, idx_plus_one, llama_model, ollama_client)
 
         # General summary
         if not commit['llama_summary'] and i < 100: # todo: remove this condition for the final version
-            summary_retrieved_docs = generate_general_summary(commit, idx, llama_model, ollama_client)
+            summary_retrieved_docs = generate_general_summary(commit, idx_plus_one, llama_model, ollama_client)
 
         # Technical summary
         if not commit['llama_tech_summary'] and i < 100: # todo: remove this condition for the final version
-            tech_summary_retrieved_docs = generate_technical_summary(commit, idx, llama_model, ollama_client)
-            pass
+            tech_summary_retrieved_docs = generate_technical_summary(commit, idx_plus_one, llama_model, ollama_client)
 
         # save summaries and categories
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(save_commits, commits_few_shots,
                                 full_path(current_directory + '/' + commits_folder, "few_shots")),
-                executor.submit(save_summaries_to_sqlite, idx, "test1", datetime.datetime.now(),
+                executor.submit(save_summaries_to_sqlite, idx_plus_one, "test1", datetime.datetime.now(),
                                 commit['llama_category'],
                                 commit['llama_summary'], summary_retrieved_docs,
                                 commit['llama_tech_summary'], tech_summary_retrieved_docs),
-                executor.submit(save_commit_to_chromadb, commit, idx, SummaryType.GENERAL),
-                executor.submit(save_commit_to_chromadb, commit, idx, SummaryType.TECHNICAL)
+                executor.submit(save_commit_to_chromadb, commit, idx_plus_one, SummaryType.GENERAL),
+                executor.submit(save_commit_to_chromadb, commit, idx_plus_one, SummaryType.TECHNICAL)
             ]
             concurrent.futures.wait(futures)
         # save_commits(commits_few_shots, full_path(current_directory  + '/' + commits_folder, "few_shots"))
@@ -123,9 +121,6 @@ def main():
     print(f"Recall: {r}")
     print(f"Accuracy: {a}")
     pass
-
-
-
 
 if __name__ == "__main__":
     main()
