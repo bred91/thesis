@@ -23,7 +23,7 @@ llm = OllamaLLM(model=MODEL_NAME, num_ctx=NUM_CTX, temperature=0.0)
 
 # -- System Prompt ---------------------------------------------------------
 SYSTEM = """
-You are a helpful assistant that answers questions based on the provided context.
+You are a helpful assistant that answers questions about the MuJS project based on the provided context.
 You will receive a series of documents, each with metadata including a commit hash, date, message, and content.
 If you do not know the answer, you should say "I don't know".
 <context>
