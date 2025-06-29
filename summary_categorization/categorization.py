@@ -21,31 +21,8 @@ CATEGORIES = [
 
 categories_text = '\n'.join([f"{i + 1}. {category}" for i, category in enumerate(CATEGORIES)])
 
-def generate_prompt_categorization_few_shots(commit):
-    """
-    Generate a prompt for categorizing a Git commit.
-    """
-
-    prompt = f"""
-    You are tasked with categorizing commits based on their purpose and significance. Use the following categories:
-
-      {categories_text}
-
-      Each commit has the following details:
-      - **Commit Informations:**
-        - **Hash (unique identifier):**
-        - **Author (person who did the commit)**
-        - **Date(date in which the commit was done)**
-        - **Commit Message (breif explanation of what’s been changed inside the commit)**
-        - **Changed Files: (list of files affected from the commit)*
-        - **Diffs (Lines of code changed in each file)**
-
-      **Instructions:**
-      1. Review the commit information carefully, including the message, modified files, and code diffs.
-      2. Classify the commit into one of the provided categories.
-      3. Provide a single category from the list based on the purpose and significance of the changes.
-
-      **Example 1 :**
+original_examples = """
+    **Example 1 :**
 
       Commit Informations:
       - Hash (unique identifier): 1a2b3c4d
@@ -95,7 +72,33 @@ def generate_prompt_categorization_few_shots(commit):
       - if user['name']:
       + if user.get('name') is not None:
       **category**: Bug Fix
+"""
 
+def generate_prompt_categorization_few_shots(commit):
+    """
+    Generate a prompt for categorizing a Git commit.
+    """
+
+    prompt = f"""
+    You are tasked with categorizing commits based on their purpose and significance. Use the following categories:
+
+      {categories_text}
+
+      Each commit has the following details:
+      - **Commit Informations:**
+        - **Hash (unique identifier):**
+        - **Author (person who did the commit)**
+        - **Date(date in which the commit was done)**
+        - **Commit Message (breif explanation of what’s been changed inside the commit)**
+        - **Changed Files: (list of files affected from the commit)*
+        - **Diffs (Lines of code changed in each file)**
+
+      **Instructions:**
+      1. Review the commit information carefully, including the message, modified files, and code diffs.
+      2. Classify the commit into one of the provided categories.
+      3. Provide a single category from the list based on the purpose and significance of the changes.
+
+      {original_examples}
 
       Now, analyze the following commit:
 
