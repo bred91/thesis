@@ -132,6 +132,10 @@ few_shots = [
         "How many commits were done by X?",
         "SELECT COUNT(*) FROM commits WHERE author LIKE '%X%';"
     ),
+    (
+        "How many times the file `jsarray.c` was modified during the last year?",
+        "SELECT COUNT(*) FROM commits WHERE files LIKE '%jsarray.c%' AND date >= date('now', '-1 year');"
+    )
 ]
 _examples = "\n".join(f"Question: {q}\nSQL: {s}" for q, s in few_shots)
 
