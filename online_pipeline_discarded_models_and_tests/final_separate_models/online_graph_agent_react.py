@@ -89,7 +89,7 @@ def general_project_info(query: str) -> str:
     return "\n---\n".join(d.page_content for d in docs)
 
 
-SQLITE_PATH = "./db_sqllite/sqlite.db"
+SQLITE_PATH = "../../db_sqllite/sqlite.db"
 
 few_shots = [
     ("How many commits were made on 2025-05-12?", "SELECT COUNT(*) FROM commits WHERE date = '2025-05-12';"),
