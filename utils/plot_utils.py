@@ -35,7 +35,7 @@ def plot_categories(commits, shot_method):
     # Show the plot
     plt.show()
 
-    plt.savefig(f"plot_categories_{shot_method}.svg", format="svg")
+    plt.savefig(f"plots/plot_categories_{shot_method}.svg", format="svg")
 
 
 def plot_categories_pie_chart(commits,shot_method):
@@ -54,4 +54,4 @@ def plot_categories_pie_chart(commits,shot_method):
     plt.pie(counts, labels=categories, autopct='%1.1f%%', startangle=140)
     plt.title('Commit Classification Pie Chart')
     plt.show()
-    plt.savefig(f"plot_categories_pie_chart_{shot_method}.svg", format="svg")
+    plt.savefig(f"plots/plot_categories_pie_chart_{shot_method}.svg", format="svg")
