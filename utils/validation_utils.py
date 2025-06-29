@@ -1,4 +1,4 @@
-ground_truth_array = [ "Dependency Update","Dependency Update",
+ground_truth_array = [ #"Dependency Update","Dependency Update",
   "Performance Improvement", "Performance Improvement", "Bug Fix", "Feature Update", "Bug Fix", "Performance Improvement", "Performance Improvement",
   "Bug Fix", "Bug Fix", "Feature Update", "Feature Update", "Refactoring", "Feature Update", "Bug Fix", "Feature Update", "Feature Update", "Feature Update",
   "Refactoring", "Bug Fix", "Feature Update", "Bug Fix", "Bug Fix", "Refactoring", "Bug Fix", "Feature Update", "Bug Fix", "Feature Update", "Feature Update",
@@ -23,18 +23,18 @@ def calculate_precision_recall_categorization(commits, ground_truth):
   fp = 0
   fn = 0
 
-  last_102_commits = len(commits) - 102
+  commits_to_be_evaluated_baseline = 480
+  commits_to_be_evaluated_delta = 100
   #print(ground_truth)
   print("Commits:")
 
   for i, commit in commits.items():
-    if i==0:
-        print(commit)
-    if i <= last_102_commits:
+    # Skip commits that are not in the evaluation range
+    if i < commits_to_be_evaluated_baseline or i >= commits_to_be_evaluated_baseline + commits_to_be_evaluated_delta:
       continue
 
     predicted = commit['llama_category']
-    actual = ground_truth[i-last_102_commits]
+    actual = ground_truth[i-commits_to_be_evaluated_baseline]
     print(f"Commit {i}: Predicted: {predicted}, Actual: {actual}")
 
     if predicted != actual:
