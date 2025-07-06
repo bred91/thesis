@@ -21,3 +21,6 @@ MUJS_DOCS_LOCAL_PATH = './mujs/docs'
 
 # Ollama
 OLLAMA_CLIENT_HOST = 'http://localhost:11434'
+
+# Categorization parameters
+NEW_EXAMPLES = True
