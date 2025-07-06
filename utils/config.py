@@ -1,5 +1,6 @@
 # Model & Embeddings
-MODEL_NAME = "llama3.1:8b-instruct-q8_0"
+ONLINE_MODEL_NAME = "qwen3:8b"#"deepseek-r1:8b" #"llama3.1:8b-instruct-q8_0"
+OFFLINE_MODEL_NAME = "llama3.1:8b-instruct-q8_0"  # For offline use
 EMBEDDING_MODEL = "nomic-embed-text"
 SEED = 42
 NUM_CTX = 32768
