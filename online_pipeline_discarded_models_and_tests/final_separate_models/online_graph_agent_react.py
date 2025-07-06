@@ -8,12 +8,12 @@ from langchain_ollama import ChatOllama, OllamaEmbeddings
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
 
-from utils.config import MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
+from utils.config import ONLINE_MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
     GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA
 
 # -------------------- LLM & Embeddings --------------------
 llm = ChatOllama(
-    model=MODEL_NAME,
+    model=ONLINE_MODEL_NAME,
     num_ctx=NUM_CTX,
     temperature=0.0
 )

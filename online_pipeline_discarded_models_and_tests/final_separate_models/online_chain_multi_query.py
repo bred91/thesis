@@ -7,7 +7,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_ollama import OllamaEmbeddings
 from langchain_ollama.llms import OllamaLLM
 
-from utils.config import COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, MODEL_NAME, NUM_CTX, SEED, \
+from utils.config import COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, ONLINE_MODEL_NAME, NUM_CTX, SEED, \
     CHROMA_METADATA
 
 chroma = Chroma(
@@ -18,8 +18,8 @@ chroma = Chroma(
 )
 
 # Base LLM for Q&A and document summarization
-llm_main    = OllamaLLM(model=MODEL_NAME, temperature=0.0, num_ctx=NUM_CTX, seed=SEED)
-llm_queries = OllamaLLM(model=MODEL_NAME, temperature=0.3, num_ctx=NUM_CTX, seed=SEED)
+llm_main    = OllamaLLM(model=ONLINE_MODEL_NAME, temperature=0.0, num_ctx=NUM_CTX, seed=SEED)
+llm_queries = OllamaLLM(model=ONLINE_MODEL_NAME, temperature=0.3, num_ctx=NUM_CTX, seed=SEED)
 
 # Advanced retriever with multi-query support
 # base retriever

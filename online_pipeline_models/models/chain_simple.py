@@ -7,7 +7,7 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_ollama.llms import OllamaLLM
 
 from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
-from utils.config import NUM_CTX, MODEL_NAME, COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, \
+from utils.config import NUM_CTX, ONLINE_MODEL_NAME, COMMITS_COLLECTION_NAME, EMBEDDING_MODEL, CHROMA_PERSIST_DIR, \
     CHROMA_METADATA
 
 # -- Vector store & retriever --------------------------------------------------
@@ -20,7 +20,7 @@ chroma_simple = Chroma(
 retriever = chroma_simple.as_retriever()
 
 # -- LLM -----------------------------------------------------------------------
-llm = OllamaLLM(model=MODEL_NAME, num_ctx=NUM_CTX, temperature=0.0)
+llm = OllamaLLM(model=ONLINE_MODEL_NAME, num_ctx=NUM_CTX, temperature=0.0)
 
 # -- System Prompt ---------------------------------------------------------
 SYSTEM = """

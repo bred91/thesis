@@ -12,14 +12,14 @@ from langchain_ollama import ChatOllama
 from langchain_ollama import OllamaEmbeddings
 
 from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
-from utils.config import MODEL_NAME, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, SQL_PERSIST_DIR, \
+from utils.config import ONLINE_MODEL_NAME, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, SQL_PERSIST_DIR, \
     GENERAL_DOCS_COLLECTION_NAME, NUM_CTX, CHROMA_METADATA
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # ---- Model and Memory ----
 ollama_llm = ChatOllama(
-    model=MODEL_NAME,
+    model=ONLINE_MODEL_NAME,
     num_ctx=NUM_CTX,
     temperature=0.0
 )
