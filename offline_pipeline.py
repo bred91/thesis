@@ -111,6 +111,8 @@ def main():
             ]
             concurrent.futures.wait(futures)
 
+    logger.debug("All commits processed and saved successfully.")
+
 
 if __name__ == "__main__":
     main()
