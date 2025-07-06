@@ -1,6 +1,7 @@
 import logging
 
-from utils.config import SEED
+from summary_categorization.categorization_examples.categorization_examples import refined_ex, original_examples
+from utils.config import SEED, NEW_EXAMPLES
 from utils.llm_utils import clean_text_paragraph
 
 logger = logging.getLogger("DBLogger")
@@ -21,58 +22,7 @@ CATEGORIES = [
 
 categories_text = '\n'.join([f"{i + 1}. {category}" for i, category in enumerate(CATEGORIES)])
 
-original_examples = """
-    **Example 1 :**
-
-      Commit Informations:
-      - Hash (unique identifier): 1a2b3c4d
-      - Author: John Doe
-      - Date: 2025-01-01 10:00:00
-      - Commit Message: Refactored the user authentication module to improve performance and readability.
-      - Changed Files: auth.py, user_model.py
-      - Diffs:
-        auth.py:
-        ```diff
-        - def authenticate_user(username, password):
-        -     if username and password:
-        -         return check_credentials(username, password)
-        + def authenticate_user(user_credentials):
-        +     return validate_user(user_credentials)
-      user_model.py:
-      + def validate_user(credentials):
-      +     # New validation logic for login
-      +     return is_valid(credentials)
-      **category**: Refactoring
-
-      **Example 2 :**
-      Commit Informations:
-      - Hash (unique identifier): 3c2b1a4f
-      - Author: Alex Brown
-      - Date: 2025-01-03 12:00:00
-      - Commit Message: Updated the README with installation instructions and new feature descriptions.
-      - Changed Files: README.md
-      - Diffs:
-      README.md:
-      ```diff
-      + ## Installation
-      + Run the following command to install:
-      + pip install mypackage
-      **category**: Documentation Update
-
-      **Example 3 : **
-      Commit Informations:
-      - Hash (unique identifier): 9f8e7d6c
-      - Author: Jane Smith
-      - Date: 2025-01-02 15:00:00
-      - Commit Message: Fixed incorrect handling of null values in user profile updates.
-      - Changed Files: profile.py
-      - Diffs:
-      profile.py:
-      ```diff
-      - if user['name']:
-      + if user.get('name') is not None:
-      **category**: Bug Fix
-"""
+examples = refined_ex if NEW_EXAMPLES else original_examples
 
 def generate_prompt_categorization_few_shots(commit):
     """
@@ -98,7 +48,7 @@ def generate_prompt_categorization_few_shots(commit):
       2. Classify the commit into one of the provided categories.
       3. Provide a single category from the list based on the purpose and significance of the changes.
 
-      {original_examples}
+      {examples} 
 
       Now, analyze the following commit:
 
