@@ -1,6 +1,7 @@
 import logging
 
-from summary_categorization.categorization_examples.categorization_examples import refined_ex, original_examples
+from summary_categorization.categorization_examples.categorization_examples import original_examples, \
+    refined_ex
 from utils.config import SEED, NEW_EXAMPLES
 from utils.llm_utils import clean_text_paragraph
 
