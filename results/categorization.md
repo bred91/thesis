@@ -11,9 +11,9 @@ Recall: **1.0** <br>
 Accuracy: **0.67** <br>
 
 ## New Examples with Llama 3.1 8B
-Precision: **0.7395833333333334** <br>
-Recall: **0.9466666666666667** <br>
-Accuracy: **0.71**  <br>
+Precision: **0.7346938775510204** <br>
+Recall: **0.972972972972973** <br>
+Accuracy: **0.72**  <br>
 
 ## Original Examples with Gwen
 It does not work with Gwen, as it is not able to categorize the data points.
