@@ -11,34 +11,32 @@ ground_truth_array = [ #"Dependency Update","Dependency Update",
   "Feature Update", "Refactoring"
 ][::-1]
 
-def calculate_precision_recall_categorization(commits, ground_truth):
+def calculate_precision_recall_categorization(commits, ground_truth, verbose=False):
   """
   Returns the precision and recall of the commits.
   Note that ground_truth is a list where ground_truth[i] is the category of the i-th commit.
   Should be handcrafted or GPT generated.
   """
 
-  tp = 0
-  tn = 0
-  fp = 0
-  fn = 0
+  tp = tn = fp = fn = 0
+  baseline = 480
+  delta = 100
+  eval_keys = [k for k in commits.keys() if baseline <= k < baseline + delta]
+  eval_commits = [commits[k] for k in eval_keys]
 
-  commits_to_be_evaluated_baseline = 480
-  commits_to_be_evaluated_delta = 100
   #print(ground_truth)
-  print("Commits:")
+  if verbose:
+    print("Commits:")
 
-  for i, commit in commits.items():
-    # Skip commits that are not in the evaluation range
-    if i < commits_to_be_evaluated_baseline or i >= commits_to_be_evaluated_baseline + commits_to_be_evaluated_delta:
-      continue
-
+  for i, commit in enumerate(eval_commits):
     predicted = commit['llama_category']
-    actual = ground_truth[i-commits_to_be_evaluated_baseline]
-    print(f"Commit {i}: Predicted: {predicted}, Actual: {actual}")
+    actual = ground_truth[i]
 
-    if predicted != actual:
-      print(commit)
+    if verbose:
+      print(f"Commit {i}: Predicted: {predicted}, Actual: {actual}")
+
+      if predicted != actual:
+        print(commit)
 
     if predicted == actual:
       if predicted == 'Other':
