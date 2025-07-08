@@ -22,5 +22,6 @@ MUJS_DOCS_LOCAL_PATH = './mujs/docs'
 # Ollama
 OLLAMA_CLIENT_HOST = 'http://localhost:11434'
 
-# Categorization parameters
+# Offline pipeline parameters
+OFFLINE_PIPELINE_TEST_NAME = "final_exp_4"
 NEW_EXAMPLES = True

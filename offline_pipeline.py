@@ -16,7 +16,7 @@ from summary_categorization.technical_summarization import generate_technical_su
 from utils.chromadb_utils import save_commit_to_chromadb, delete_all_documents, save_general_document_to_chromadb
 from utils.commit_utils import filter_trivial_commits, normalize_commit_data
 from utils.config import SQL_PERSIST_DIR, MUJS_REMOTE_URL, MUJS_LOCAL_PATH, OLLAMA_CLIENT_HOST, SEED, \
-    OFFLINE_MODEL_NAME
+    OFFLINE_MODEL_NAME, OFFLINE_PIPELINE_TEST_NAME
 from utils.enums import SummaryType
 from utils.file_utils import load_commits, save_commits, full_path
 from utils.git_utils import extract_git_commits, extract_mujs_docs
@@ -102,7 +102,7 @@ def main():
             futures = [
                 executor.submit(save_commits, commits_few_shots,
                                 full_path(current_directory + '/' + commits_folder, "few_shots")),
-                executor.submit(save_summaries_to_sqlite, idx_plus_one, "final_exp_1", datetime.datetime.now(),
+                executor.submit(save_summaries_to_sqlite, idx_plus_one, OFFLINE_PIPELINE_TEST_NAME, datetime.datetime.now(),
                                 commit['llama_category'],
                                 commit['llama_summary'], summary_retrieved_docs,
                                 commit['llama_tech_summary'], tech_summary_retrieved_docs),
