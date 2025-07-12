@@ -9,12 +9,19 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
 
 from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
-from utils.config import MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
-    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR
+from utils.config import ONLINE_MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
+    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, OFFLINE_MODEL_NAME
 
 # -------------------- LLM & Embeddings --------------------
 llm = ChatOllama(
-    model=MODEL_NAME,
+    model=ONLINE_MODEL_NAME,
+    num_ctx=NUM_CTX,
+    temperature=0.0,
+    extract_reasoning=True
+)
+
+llm2 = ChatOllama(
+    model=OFFLINE_MODEL_NAME,
     num_ctx=NUM_CTX,
     temperature=0.0
 )
@@ -152,6 +159,7 @@ sql_prompt = PromptTemplate(
         For author matching, use LIKE format.
         
         ⚠️  Reply **only** with the SQL query—no commentary, no ``` fencing.
+        You can only do SELECT queries.
 
         Question: {{question}}
         SQL:
