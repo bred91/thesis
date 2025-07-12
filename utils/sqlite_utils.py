@@ -93,3 +93,37 @@ def delete_all_summaries():
     cursor.execute("DELETE FROM sqlite_sequence WHERE name='summaries'")
     conn.commit()
     conn.close()
+
+
+def retrieve_all_summaries_to_be_validated():
+    """
+    Retrieve all summaries that will be validated from the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM summaries") # todo: add filtering for 50/100 summaries to be validated
+    rows = cursor.fetchall()
+
+    # Convert rows to a list of dictionaries
+    summaries = []
+    for row in rows:
+        summary = {
+            "id": row[0],
+            "commit_id": row[1],
+            "experiment_name": row[2],
+            "date": row[3],
+            "llama_category": row[4],
+            "llama_summary": row[5],
+            "llama_summary_retrieved_docs": json.loads(row[6]),
+            "llama_summary_retrieved_docs_count": row[7],
+            "llama_summary_retrieved_docs_scores": json.loads(row[8]),
+            "llama_tech_summary": row[9],
+            "llama_tech_summary_retrieved_docs": json.loads(row[10]),
+            "llama_tech_summary_retrieved_docs_count": row[11],
+            "llama_tech_summary_retrieved_docs_scores": json.loads(row[12])
+        }
+        summaries.append(summary)
+
+    conn.close()
+    return summaries
