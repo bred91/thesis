@@ -2,13 +2,13 @@ import argparse
 
 from online_pipeline_models.pipeline_factory import get_chat_pipeline
 
-HELP = """/exit to exit – /reset to clear memory"""
+HELP = " - \033[1;3m/exit\033[0m to exit \n - \033[1;3m/reset\033[0m to clear memory"
 
 MODEL_CHOICES = ["simple", "multi_query", "chain_agent_react", "graph_agent_react_vanilla", "graph_agent_react"]
 
 def interactive_cli(model_name: str):
     pipe = get_chat_pipeline(model_name)
-    print(f"[{model_name}] ready. {HELP}\n")
+    print(f"[{model_name}] ready \n{HELP}\n")
     while True:
         msg = input("You: ")
         cmd = msg.strip().lower()
