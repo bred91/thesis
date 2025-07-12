@@ -4,7 +4,7 @@ from online_pipeline_models.pipeline_factory import get_chat_pipeline
 
 HELP = """/exit to exit – /reset to clear memory"""
 
-MODEL_CHOICES = ["simple", "multi_query", "chain_agent_react", "graph_agent_react"]
+MODEL_CHOICES = ["simple", "multi_query", "chain_agent_react", "graph_agent_react_vanilla", "graph_agent_react"]
 
 def interactive_cli(model_name: str):
     pipe = get_chat_pipeline(model_name)
