@@ -95,7 +95,7 @@ def ask_model_categorization(prompt, ollama_client, model):
         prompt=prompt,
         options={
             "num_predict": 20,      # Maximum number of tokens to generate
-            "temperature": 0,       # Deterministic output
+            "temperature": 0.0,       # Deterministic output
             "top_p": 0.8,             # Nucleus sampling: 1 = no restriction
             "seed": SEED,            # Fixed seed for reproducibility
         },
