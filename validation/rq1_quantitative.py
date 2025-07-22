@@ -14,7 +14,7 @@ bert_score = evaluate.load('bertscore')
 def calculate_save_rq1_quantitative_evaluation(summaries: list[Summary], references: dict[str,list], with_bert: bool = False) -> None:
 
     # Calculation of the various text summarization metrics (ROUGE, BLEU, METEOR, BERTScore)
-    bert_score_results_details = general_bert_precision = general_bert_recall = general_bert_f1 \
+    general_bert_precision = general_bert_recall = general_bert_f1 \
         = technical_bert_precision = technical_bert_recall = technical_bert_f1 = None
 
     general_predictions = [s.llama_summary for s in summaries]
@@ -29,15 +29,6 @@ def calculate_save_rq1_quantitative_evaluation(summaries: list[Summary], referen
     technical_rouge_results, technical_bleu_results, technical_meteor_results = compute_aggregated_scores(
         technical_predictions, references[SummaryType.TECHNICAL.value]
     )
-    # general_rouge_results = rouge.compute(predictions=general_predictions, references=references[SummaryType.GENERAL.value])
-    # general_bleu_results = bleu.compute(predictions=general_predictions,references=[[r] for r in references[SummaryType.GENERAL.value]])
-    # general_meteor_results = meteor.compute(predictions=general_predictions, references=references[SummaryType.GENERAL.value])
-    # # technical
-    # technical_rouge_results = rouge.compute(predictions=technical_predictions, references=references[SummaryType.TECHNICAL.value])
-    # technical_bleu_results = bleu.compute(predictions=technical_predictions, references=[[r] for r in references[SummaryType.TECHNICAL.value]])
-    # technical_meteor_results = meteor.compute(predictions=technical_predictions, references=references[SummaryType.TECHNICAL.value])
-
-
     # note: Bert already returns details -> for aggregation it is done manually below
 
     # Detailed Scores
@@ -81,41 +72,6 @@ def calculate_save_rq1_quantitative_evaluation(summaries: list[Summary], referen
             bert_recall=technical_bert_score_results_details["recall"][i] if with_bert else None,
             bert_f1=technical_bert_score_results_details["f1"][i] if with_bert else None,
         )
-
-
-
-
-    # predictions = general_predictions + technical_predictions
-    # references = references[SummaryType.GENERAL.value] + references[SummaryType.TECHNICAL.value]
-
-    # rouge_results_details = rouge.compute(predictions=predictions, references=references, use_aggregator=False)
-    # bleu_results_details = [
-    #     bleu.compute(predictions=[p], references=[[r]])["bleu"]
-    #     for p, r in zip(predictions, references)
-    # ]
-    # meteor_results_details = [
-    #     meteor.compute(predictions=[p], references=[r])["meteor"]
-    #     for p, r in zip(predictions, references)
-    # ]
-    # if with_bert:
-    #     bert_score_results_details = bert_score.compute(predictions=predictions, references=references, lang="en")
-
-
-    # detailed_results = [
-    #     DetailedRq1QuantitativeResults(
-    #         commit_id=i+481 if i < 100 else i-100+481,
-    #         summary_type=SummaryType.GENERAL.value if i < 100 else SummaryType.TECHNICAL.value,
-    #         rouge_1=rouge_results_details["rouge1"][i],
-    #         rouge_2=rouge_results_details["rouge2"][i],
-    #         rouge_l=rouge_results_details["rougeL"][i],
-    #         bleu=bleu_results_details[i],
-    #         meteor=meteor_results_details[i],
-    #         bert_precision=bert_score_results_details["precision"][i] if with_bert else None,
-    #         bert_recall=bert_score_results_details["recall"][i] if with_bert else None,
-    #         bert_f1=bert_score_results_details["f1"][i] if with_bert else None
-    #     )
-    #     for i in range(len(predictions))
-    # ]
 
     print("<---- Saving evaluations --->")
     save_r1_quantitative_results(detailed_results)
