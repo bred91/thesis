@@ -14,6 +14,7 @@ logger.setLevel(logging.DEBUG)
 def generate_prompt_summarization_few_shots(commit):
     prompt = f"""
         You are a helpful assistant. Provide a concise description of what has been done in the following commits.
+        Stick strictly to the provided changes; do not assume any changes beyond those shown in the diff.
 
         Example 1:
         Commit Informations:
@@ -108,13 +109,16 @@ def generate_prompt_summarization_few_shots(commit):
         Changed Files - files modified in this commit:
         {', '.join(commit['files'])}
         Diffs - lines of code changed in each file:
-        {chr(10).join([f"{file_name}: {diff[:1000]}" for file_name, diff in commit['diffs'].items()])}
+        {chr(10).join([f"{file_name}: {diff}" for file_name, diff in commit['diffs'].items()])}
 
-        Use all the informations available to analyze the changes focusing on the purpose, key changes, and significance.
+        Use all the information available to analyze the changes focusing on the purpose, key changes, and significance.
         Exclude unnecessary technical details and make it easy to understand for a project manager or developer.
 
-        Do not repeat the prompt. Do no repeat any of the information provided above. Do not include lines of code
-        Answer:
+        Do not repeat the prompt. Do no repeat any of the information provided above. Do not include lines of code.
+        Don't start with sentences like `Here is a concise description of the commit:` or similar ones.
+        
+        Just write the summary!        
+        
     """
     prompt = clean_text_paragraph(prompt)
     return prompt
@@ -134,7 +138,7 @@ def ask_model_summarization(prompt, ollama_client, model):
         prompt=prompt,
         options={
             "num_predict": 200,      # Maximum number of tokens to generate
-            "temperature": 0,
+            "temperature": 0.0,
             "top_p": 1,              # Nucleus sampling: 1 = no restriction, <1 = only most probable tokens
             "seed": SEED,
         }
@@ -165,7 +169,13 @@ def generate_general_summary(commit, idx, llama_model, ollama_client) -> list[tu
     if summary_retrieved_docs:
         logger.debug(
             f"Retrieved {len(summary_retrieved_docs)} docs for commit {idx}: {''.join(format_retrieved_docs(summary_retrieved_docs))}")
-        prompt += "\n\nPrevious similar commits:\n" + "\n".join([doc[0].page_content for doc in summary_retrieved_docs])
+        context_docs = "\n---\n".join(doc[0].page_content for doc in summary_retrieved_docs)
+        prompt += (
+            "\n\nContext:\n"
+            "Here are previous *similar* commits. Use them **only** if they are directly relevant; "
+            "do not transfer details that are absent from the current diff.\n\n"
+            f"{context_docs}\n"
+        )
     else:
         logger.debug(f"No similar commits found for commit {idx}")
 

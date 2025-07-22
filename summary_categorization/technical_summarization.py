@@ -19,6 +19,7 @@ def generate_prompt_technical_analysis(commit, comment=None):
 
     prompt = f"""
         You are an expert developer and code reviewer. Analyze the following code diffs from a commit and provide a detailed technical explanation of the changes, including any potential impact on functionality, performance, or correctness.
+        Stick strictly to the provided changes; do not assume any changes beyond those shown in the diff.
 
         Use the following format:
         - **Summary of Changes**: A brief summary of the changes made in the diff.
@@ -26,6 +27,8 @@ def generate_prompt_technical_analysis(commit, comment=None):
         - **Performance**: Mention any impact on performance, if applicable (e.g., optimizations, changes in computational complexity).
         - **Correctness**: Discuss any potential correctness issues or improvements.
         - **Other Considerations**: Any other relevant points, such as code style, readability, or maintainability.
+        
+        If a section is not impacted by the changes, write “No significant impact.” instead of inventing details.
 
         Example 1:
         Commit Information's:
@@ -85,39 +88,42 @@ def generate_prompt_technical_analysis(commit, comment=None):
         Changed Files - files modified in this commit:
         {', '.join(commit['files'])}
         Diffs - lines of code changed in each file:
-        {chr(10).join([f"{file_name}: {diff[:1000]}" for file_name, diff in commit['diffs'].items()])}
+        {chr(10).join([f"{file_name}: {diff}" for file_name, diff in commit['diffs'].items()])}
 
-        Provide a detailed technical analysis of the changes made, covering the following areas:
+        Provide a detailed technical analysis of the changes made, covering the following areas (use the same format as the examples):
         - Summary of Changes
         - Functionality
         - Performance
         - Correctness
-        - Other Considerations
-
-        Do not repeat the prompt.
+        - Other Considerations    
+        
         {f"Follow this recommendations: {comment}" if comment else ''}
-
-        Summary of Changes:
+        
+        Do not repeat the prompt. Do no repeat any of the information provided above, like commit hash.
+        Don't start with sentences like `Here is a detailed technical analysis of the changes made in the commit:` or similar ones.
+        
+        Just write in the format expressed above!
+        
     """
 
     prompt = clean_text_paragraph(prompt)
     return prompt
 
 
-def generate_quality_assurance_prompt(technical_summary):
+def generate_quality_assurance_prompt(technical_summary, diffs) -> str:
     """
     Generate the QA prompt based on the technical summary.
     """
     prompt = f"""
-    You are a quality assurance expert tasked with evaluating the technical summary of a commit. Below is the technical summary of the changes made in the commit:
-
-    Your task is to evaluate the quality of the technical summary by assigning it a mark from **0 to 10** and providing feedback for improvement. Use the following guidelines for scoring:
-
+    You are a quality assurance expert tasked with evaluating the technical summary of a commit. 
+    Your task is, using the diffs as tech reference, to evaluate the quality of the technical summary by assigning it a mark from **0 to 10** and providing feedback for improvement. 
+    
+    Use the following guidelines for scoring:
     - **10**: The summary is flawless, thoroughly explains all key aspects, and includes exceptional clarity and insight.
     - **8-9**: The summary is clear, detailed, and mostly complete, with minor room for improvement.
     - **6-7**: The summary is adequate but lacks some details, clarity, or key insights.
-    - **4-5**: The summary is incomplete or unclear in significant ways, requiring notable improvement.
-    - **0-3**: The summary is severely lacking or inaccurate, failing to convey the purpose, impact, or details of the changes.
+    - **4-5**: The summary is lightly hallucinated, incomplete or unclear in significant ways, requiring notable improvement.
+    - **0-3**: The summary is severely hallucinated, lacking or inaccurate, failing to convey the purpose, impact, or details of the changes.
 
     Additionally, provide detailed feedback for improvement, regardless of the score. Highlight the strengths of the summary and suggest specific areas for clarification, expansion, or rephrasing.
 
@@ -150,9 +156,20 @@ def generate_quality_assurance_prompt(technical_summary):
     - Improvement Suggestions: While the summary provides a clear explanation of the refactor, it could benefit from more context on how the change will impact the user experience or the way the user profile data is accessed in other parts of the system. The description is missing the rationale behind choosing to combine `settings` and `preferences` into a single object—this would help readers understand why this change is beneficial in the long run.
 
     Now, please evaluate the provided technical summary. Do not repeat the prompt.
+    
+    Example 4:
+    Technical Summary:
+    The commit introduces a refactor to the authentication module, which involves several key changes. Firstly, the `authenticate_user` function has been modified to support multi-factor authentication by adding a new `mfa_token` parameter. This change allows the system to require both a password and an additional MFA token for users to log in, improving security. Additionally, the function now checks the user's `mfa_status` before authentication and raises an error if MFA is required but not provided. This refactor also ensures backward compatibility, as users who do not have MFA enabled will continue to log in with just their password. Finally, related functions in the `user_session` and `security` modules have been updated to handle the new parameter appropriately. The change enhances overall security without sacrificing usability.
+    
+    Evaluation:
+    - Mark: 1
+    - Improvement Suggestions: The technical summary is highly hallucinated and does not accurately reflect the changes made in the commit. It talks about a refactor that does not exist in the provided diffs, and it fails to mention any specific files or functions that were modified. The summary lacks clarity and does not provide any meaningful insights into the changes. It needs a complete rewrite to accurately represent the commit's purpose and impact.
 
     Technical Summary:
     {technical_summary}
+    
+    Diffs:
+    {chr(10).join([f"{file_name}: {diff}" for file_name, diff in diffs.items()])}
 
     Answer:
     """
@@ -177,7 +194,7 @@ def ask_model_technical_analysis(prompt, ollama_client, model) -> str:
         prompt=prompt,
         options={
             "num_predict": 500,
-            "temperature": 0.7,
+            "temperature": 0,
             "top_p": None,
         }
     )
@@ -204,7 +221,7 @@ def ask_model_quality_assurance(prompt, ollama_client, model) -> tuple[str, str]
         prompt=prompt,
         options={
             "num_predict": 500,  # Increased tokens
-            "temperature": 0.7,
+            "temperature": 0.0,
             "top_p": None,  # Nucleus sampling: no restriction
             "seed": SEED,
         })
@@ -247,10 +264,18 @@ def generate_technical_report(commit, idx, llama_model, ollama_client, retrieved
 
         prompt = generate_prompt_technical_analysis(commit, improvements)
         if retrieved_docs:
-            prompt += "\n\nPrevious potentially similar commits:\n" + "\n".join([doc[0].page_content for doc in retrieved_docs])
+            context_docs = "\n---\n".join(doc[0].page_content for doc in retrieved_docs)
+
+            prompt += (
+                "\n\nContext:\n"
+                "Here are previous *similar* commits. Use them **only** if they are directly relevant; "
+                "do not transfer details that are absent from the current diff.\n\n"
+                f"{context_docs}\n"
+            )
+
         technical_summary = ask_model_technical_analysis(prompt, ollama_client, llama_model)
 
-        qa_prompt = generate_quality_assurance_prompt(technical_summary)
+        qa_prompt = generate_quality_assurance_prompt(technical_summary, commit['diffs'])
         mark_qa, improvements = ask_model_quality_assurance(qa_prompt, ollama_client, llama_model)
 
         # print(f"Mark: {mark_qa}")
@@ -264,12 +289,18 @@ def generate_technical_summary(commit, idx, llama_model, ollama_client) -> list[
     logger.debug(f"Summarizing (General) commit {idx}")
     prompt = generate_prompt_technical_analysis(commit)
     tech_summary_retrieved_docs = (
-        retrieve_top_commits_by_summary_type(prompt, SummaryType.TECHNICAL, n_results=3))
+        retrieve_top_commits_by_summary_type(prompt, SummaryType.TECHNICAL, n_results=3, threshold=0.74))
 
     if tech_summary_retrieved_docs:
         logger.debug(
             f"Retrieved {len(tech_summary_retrieved_docs)} tech docs for commit {idx}: {''.join(format_retrieved_docs(tech_summary_retrieved_docs))}")
-        prompt += "\n\nPrevious similar commits:\n" + "\n".join([doc[0].page_content for doc in tech_summary_retrieved_docs])
+        context_docs = "\n---\n".join(doc[0].page_content for doc in tech_summary_retrieved_docs)
+        prompt += (
+            "\n\nContext:\n"
+            "Here are previous *similar* commits. Use them **only** if they are directly relevant; "
+            "do not transfer details that are absent from the current diff.\n\n"
+            f"{context_docs}\n"
+        )
     else:
         logger.debug(f"No similar commits found for commit {idx}")
 
