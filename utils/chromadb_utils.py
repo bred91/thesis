@@ -43,11 +43,11 @@ def save_commit_to_chromadb(commit, idx, summary_type: SummaryType):
     chroma_commits.add_documents([Document(page_content=doc_text, metadata=metadata)], ids=[str(idx)])
 
 
-def retrieve_top_commits_by_summary_type(query_text, summary_type:SummaryType, n_results=3) -> list[tuple[Document, float]]:
+def retrieve_top_commits_by_summary_type(query_text, summary_type:SummaryType, n_results=3, threshold=0.7) -> list[tuple[Document, float]]:
     results = chroma_commits.similarity_search_with_relevance_scores(
         query=query_text,
         k=n_results,
-        score_threshold=0.7,
+        score_threshold=threshold,
         filter={
             "type": summary_type.value
         }

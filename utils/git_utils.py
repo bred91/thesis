@@ -30,7 +30,7 @@ def extract_git_commits(repo_path, branch='master'):
             'llama_tech_summary': ''
         }
 
-        diffs = commit.diff(commit.parents[0] if commit.parents else None, create_patch=True)
+        diffs = commit.diff(commit.parents[0] if commit.parents else None, create_patch=True, R=True)
 
         for diff in diffs:
             file_diff = diff.diff.decode('utf-8')

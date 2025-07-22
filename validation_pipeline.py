@@ -1,44 +1,53 @@
-from utils.file_utils import load_commits
-from utils.plot_utils import plot_categories, plot_categories_pie_chart
-from utils.sqlite_utils import retrieve_all_summaries_to_be_validated
-from utils.validation_utils import calculate_precision_recall_categorization, ground_truth_array
+from utils.entities import Summary, Commit
+from utils.sqlite_utils import retrieve_all_summaries_to_be_validated, retrieve_all_commits_to_be_validated, \
+    retrieve_all_rq1_golden_standard
+from validation.categorization import validate_categorization
+from validation.rq1_g_eval import calculate_save_rq1_g_eval
+from validation.rq1_quantitative import calculate_save_rq1_quantitative_evaluation
 
 
-def retrieve_summaries():
+def retrieve_summaries() -> list[Summary]:
     """
     Retrieve all summaries from the SQLite database that are marked for validation.
     """
     return retrieve_all_summaries_to_be_validated()
 
-def validate_categorization():
+def retrieve_commits() -> list[Commit]:
     """
-    Validate the categorization of commits by comparing the predicted categories with the ground truth.
-    This function loads the few-shots categorized commits, plots the categories, and calculates precision, recall, and accuracy.
+    Retrieve all commits from the SQLite database that are associated with the summaries to be validated.
     """
-    data_filepath_few_shots = 'commits_few_shots.pkl'
-    commits_few_shots = load_commits('commits/'+data_filepath_few_shots)
+    return retrieve_all_commits_to_be_validated()
 
-    plot_categories(commits_few_shots, "few_shots")
-    plot_categories_pie_chart(commits_few_shots, "few_shots")
-
-    p, r, a = calculate_precision_recall_categorization(commits_few_shots, ground_truth_array)
-    print("<---- Few-shots categorization performance ---->")
-    print(f"Precision: {p}")
-    print(f"Recall: {r}")
-    print(f"Accuracy: {a}")
-    print("<-------------------- Done -------------------->")
-
+def retrieve_rq1_golden_standard():
+    """
+    Retrieve the golden standard for RQ1 from the SQLite database.
+    This is a hand-made set of summaries that are used as a reference for evaluation.
+    """
+    golden_standard = retrieve_all_rq1_golden_standard()
+    res = {
+        "commit_ids": [],
+        "general": [],
+        "technical": []
+    }
+    for gs in golden_standard:
+        res["commit_ids"].append(gs["commit_id"])
+        res["general"].append(gs["general"])
+        res["technical"].append(gs["technical"])
+    return res
 
 def main():
-    # Retrieve all the summaries that will be validated
-    summaries = retrieve_summaries()
+    # categorization
+    validate_categorization() #todo: uncomment
 
-    if not summaries:
-        print("Error: No summaries to validate.")
-        return
+    # Load summaries from the SQLite database
+    summaries: list[Summary] = retrieve_summaries()
+    commits: list[Commit] = retrieve_commits()
+    rq1_golden_standard = retrieve_rq1_golden_standard()
 
-def maino():
-    validate_categorization()
+    # RQ1: Validate the quality of the summaries of the commits
+    calculate_save_rq1_quantitative_evaluation(summaries, rq1_golden_standard, with_bert=True)#todo: uncomment
+
+    calculate_save_rq1_g_eval(summaries, commits)
 
 if __name__ == "__main__":
-    maino()
+    main()
