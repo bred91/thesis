@@ -104,11 +104,11 @@ SQLITE_PATH = SQL_PERSIST_DIR
 few_shots = [
     (
         "How many commits were made on 2025-05-12?",
-        "SELECT COUNT(*) FROM commits WHERE date = '2025-05-12';"
+        "SELECT COUNT(*) FROM commits WHERE date = '2025-05-12%';"
     ),
     (
         "List the commit hashes authored by Alice Smith.",
-        "SELECT commit_hash FROM commits WHERE author LIKE '%Alice Smith%';"
+        "SELECT commit_hash FROM commits WHERE author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%';"
     ),
     (
         "Show the latest commit message for commit hash abcd1234.",
@@ -136,8 +136,8 @@ few_shots = [
         "SELECT COUNT(*) FROM commits WHERE date LIKE '2025%';"
     ),
     (
-        "How many commits were done by X?",
-        "SELECT COUNT(*) FROM commits WHERE author LIKE '%X%';"
+        "How many commits were done by Alice Smith?",
+        "SELECT COUNT(*) FROM commits WHERE author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%';"
     ),
     (
         "How many times the file `jsarray.c` was modified during the last year?",
@@ -156,7 +156,11 @@ sql_prompt = PromptTemplate(
         that queries ONLY the table `commits`
         (id, commit_hash, author, date, message, files, diffs).
         
-        For author matching, use LIKE format.
+        For author matching, use the LIKE operator with patterns such as:
+        Alice Smith → author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%'.
+        
+        For date matching, use LIKE because dates include time:
+        2025-05-12 → date LIKE '2025-05-12%'.
         
         ⚠️  Reply **only** with the SQL query—no commentary, no ``` fencing.
         You can only do SELECT queries.
@@ -236,7 +240,9 @@ agent = create_react_agent(
         - "What changed in commit Y?" → use `commit_code`  
         - "What is MuJS?" → use `general_project_info`
         - "How many commits were made on 2025-05-12?" → use `nl_to_sql_commit_context`
-        - "Show the latest commit." → use `nl_to_sql_commit_context`        
+        - "Show me the details of the commit made in 2025 ` → use `nl_to_sql_commit_context`
+        - "Show the latest commit." → use `nl_to_sql_commit_context`    
+        - "Can you explain what changes were made in the commit by Alice Smith on 2025-05-12?" → use `commit_code` and `nl_to_sql_commit_context`
         """,
     checkpointer=checkpointer,
     debug=True,
