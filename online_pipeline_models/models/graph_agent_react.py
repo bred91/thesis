@@ -228,6 +228,8 @@ agent = create_react_agent(
             (authors, dates, commit hashes, messages, files, diffs, counts).
         - If you are unsure about what tool to use, call both `nl_to_sql_commit_context` and `commit_code`  
         - If you do not know the answer, reply with "I don't know".
+        
+        When you provide an answer, don't reference the tools used or the fact that the answer came from a tool; just provide the answer.
 
         Examples:  
         - "How does function X work?" → use `commit_code`  
