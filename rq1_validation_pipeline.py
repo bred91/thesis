@@ -37,7 +37,7 @@ def retrieve_rq1_golden_standard():
 
 def main():
     # categorization
-    validate_categorization() #todo: uncomment
+    validate_categorization()
 
     # Load summaries from the SQLite database
     summaries: list[Summary] = retrieve_summaries()
@@ -45,7 +45,7 @@ def main():
     rq1_golden_standard = retrieve_rq1_golden_standard()
 
     # RQ1: Validate the quality of the summaries of the commits
-    calculate_save_rq1_quantitative_evaluation(summaries, rq1_golden_standard, with_bert=True)#todo: uncomment
+    calculate_save_rq1_quantitative_evaluation(summaries, rq1_golden_standard, with_bert=True)
 
     calculate_save_rq1_g_eval(summaries, commits)
 
