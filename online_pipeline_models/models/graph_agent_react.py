@@ -43,7 +43,7 @@ commit_store = Chroma(
     collection_metadata=CHROMA_METADATA,
     persist_directory=CHROMA_PERSIST_DIR,
 )
-retriever_commits = commit_store.as_retriever(search_kwargs={"k": 5})
+retriever_commits = commit_store.as_retriever(search_kwargs={"k": 10})
 
 # General documentation
 doc_store = Chroma(
