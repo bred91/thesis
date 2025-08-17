@@ -1,4 +1,6 @@
 import sqlite3
+from datetime import date
+from typing import Union
 
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
@@ -9,8 +11,13 @@ from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.prebuilt import create_react_agent
 
 from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
+from online_pipeline_models.models.models_utils.graph_agent_react_nl2sql_examples import \
+    graph_agent_react_nl2sql_examples_examples
 from utils.config import ONLINE_MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
     GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, OFFLINE_MODEL_NAME
+
+today_str = date.today().isoformat()
+
 
 # -------------------- LLM & Embeddings --------------------
 llm = ChatOllama(
@@ -101,64 +108,9 @@ def general_project_info(query: str) -> str:
 
 SQLITE_PATH = SQL_PERSIST_DIR
 
-few_shots = [
-    (
-        "How many commits were made on 2025-05-12?",
-        "SELECT COUNT(*) FROM commits WHERE date = '2025-05-12%';"
-    ),
-    (
-        "List the commit hashes authored by Alice Smith.",
-        "SELECT commit_hash FROM commits WHERE author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%';"
-    ),
-    (
-        "Show the latest commit message for commit hash abcd1234.",
-        "SELECT message FROM commits WHERE commit_hash = 'abcd1234' LIMIT 1;"
-    ),
-    (
-        "Which author has contributed the highest number of commits?",
-        "SELECT author, COUNT(*) AS cnt FROM commits "
-        "GROUP BY author ORDER BY cnt DESC LIMIT 1;"
-    ),
-    (
-        "Give me every distinct date when the commit message mentions 'refactor'.",
-        "SELECT DISTINCT date FROM commits WHERE message LIKE '%refactor%';"
-    ),
-    (
-        "What files were modified in commit ef01dead?",
-        "SELECT files FROM commits WHERE commit_hash LIKE '%ef01dead%';"
-    ),
-    (
-        "When was the first commit created?",
-        "SELECT MIN(date) FROM summaries;"
-    ),
-    (
-        "How many commits were made in 2025?",
-        "SELECT COUNT(*) FROM commits WHERE date LIKE '2025%';"
-    ),
-    (
-        "How many commits were done by Alice Smith?",
-        "SELECT COUNT(*) FROM commits WHERE author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%';"
-    ),
-    (
-        "How many times the file `jsarray.c` was modified during the last year?",
-        "SELECT COUNT(*) FROM commits WHERE files LIKE '%jsarray.c%' AND date >= date('now', '-1 year');"
-    ),
-    (
-        "When the file `jsarray.c` was added to the project?",
-        "SELECT date FROM commits WHERE files LIKE '%jsarray.c%' ORDER BY date LIMIT 1;"
-    ),
-    (
-        "Retrieve me the commit where the issue #123 was fixed.",
-        "SELECT * FROM commits WHERE message LIKE '%issue%123%' OR message LIKE '%fixes%123%' OR message LIKE '%resolved%123%';"
-    )
-]
-_examples = "\n".join(f"Question: {q}\nSQL: {s}" for q, s in few_shots)
-
 sql_prompt = PromptTemplate(
     input_variables=["question"],
     template=f"""
-        {_examples}
-
         You are an expert SQLite assistant.
         Translate the user's question into the SHORTEST valid SQL query 
         that queries ONLY the table `commits`

@@ -53,4 +53,5 @@ few_shots = [
         "SELECT * FROM commits WHERE message LIKE '%issue%123%' OR message LIKE '%fixes%123%' OR message LIKE '%resolved%123%';"
     )
 ]
+
 graph_agent_react_nl2sql_examples_examples = "\n".join(f"Question: {q}\nSQL: {s}" for q, s in few_shots)
