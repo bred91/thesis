@@ -16,6 +16,10 @@ few_shots = [
         "SELECT * FROM commits WHERE commit_hash LIKE '%ef01dead%';"
     ),
     (
+        "Retrieve the commit details for eg01dead",
+        "SELECT * FROM commits WHERE commit_hash LIKE '%eg01dead%';"
+    ),
+    (
         "Which author has contributed the highest number of commits?",
         "SELECT author, COUNT(*) AS cnt FROM commits "
         "GROUP BY author ORDER BY cnt DESC LIMIT 1;"
