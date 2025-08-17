@@ -4,10 +4,10 @@ import os
 
 from git import Repo
 
-from utils.config import MUJS_DOCS_LOCAL_PATH
+from utils.config import MUJS_DOCS_LOCAL_PATH, MUJS_BRANCH
 
 
-def extract_git_commits(repo_path, branch='master'):
+def extract_git_commits(repo_path, branch=MUJS_BRANCH):
     """
     Extracts commit information from a Git repository.
     """
@@ -87,3 +87,20 @@ def extract_mujs_docs() -> list[dict]:
                 }
             )
     return docs
+
+
+def format_code(doc):
+    """
+    Formats a code document to include path and a snippet of the content.
+
+    Args:
+        doc (Document): The document containing code content.
+
+    Returns:
+        str: A formatted string with the file path and a snippet of the content.
+    """
+    path = doc.metadata.get("file_path", "<unknown>")
+    content = doc.page_content.strip()
+    snippet = content[:10000] + ("..." if len(content) > 1000 else "")
+
+    return f"FILE: {path}\n---\n{snippet}"

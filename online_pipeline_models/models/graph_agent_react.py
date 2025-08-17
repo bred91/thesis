@@ -14,7 +14,8 @@ from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
 from online_pipeline_models.models.models_utils.graph_agent_react_nl2sql_examples import \
     graph_agent_react_nl2sql_examples_examples
 from utils.config import ONLINE_MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
-    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, OFFLINE_MODEL_NAME
+    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, OFFLINE_MODEL_NAME, SEMANTIC_CODE_COLLECTION
+from utils.git_utils import format_code
 
 today_str = date.today().isoformat()
 
@@ -53,6 +54,15 @@ doc_store = Chroma(
     persist_directory=CHROMA_PERSIST_DIR,
 )
 retriever_docs = doc_store.as_retriever(search_kwargs={"k": 5})
+
+# Semantic Code
+code_store = Chroma(
+    collection_name=SEMANTIC_CODE_COLLECTION,
+    embedding_function=embeddings,
+    collection_metadata=CHROMA_METADATA,
+    persist_directory=CHROMA_PERSIST_DIR,
+)
+retriever_code = code_store.as_retriever(search_kwargs={"k": 20})
 
 
 # -------------------- Helper --------------------
@@ -176,6 +186,26 @@ def nl_to_sql_commit_context(question: str) -> str:
         return f"Error executing:\n{sql_query}\n\n{e}"
 
 
+# Tool 4 - Semantic Search on Actual Code
+@tool(
+    name_or_callable="semantic_code",
+    description="""
+        Use this tool to search and explain *current* source code
+        (functions, structures, logic) in the master branch of MuJS.
+        Great for questions like: "What does function X do?"
+    """
+)
+def semantic_code(query: str) -> str:
+    """
+    It performs a semantic search on the MuJS codebase to find relevant code snippets
+    This tool is useful for understanding the implementation of specific functions or logic in the codebase.
+    """
+    docs = retriever_code.invoke(query)
+    if not docs:
+        return "No relevant code snippets found."
+    return "\n\n".join(format_code(d) for d in docs)
+
+
 # -------------------- Agent --------------------
 
 # Checkpointer for saving conversation state
@@ -186,7 +216,7 @@ checkpointer = InMemorySaver()
 # React Agent using LangGraph
 agent = create_react_agent(
     model=llm,
-    tools=[commit_code, general_project_info, nl_to_sql_commit_context],
+    tools=[commit_code, general_project_info, nl_to_sql_commit_context, semantic_code],
     prompt=f"""
         You are a helpful assistant for the MuJS project.  
         Don't answer to unrelated questions and don't provide unrelated information.
@@ -198,8 +228,11 @@ agent = create_react_agent(
         - Use the `general_project_info` tool only for questions about general project information, documentation, or high-level overviews.
         - Use the `nl_to_sql_commit_context` tool only for questions that require temporal, aggregated or filtered information about commits, and their authors, message, files and diffs.  
             it returns this fields: (commit_hash, author, "date", message, files, diffs). This tool have the most correct and precise information about commits.
+        - Use the `semantic_code` tool to search and explain *current* source code (functions, structures, logic) in the master branch of MuJS.
+            It is great for questions like: "What does function X do?" or "How is it implemented the regex function in MuJS?".
+            It returns the code snippets and/or explanations about the code and the solution.
         - Use the `commit_code` tool to answer any question about code, source files, functions, code changes, commits or relationships between them. 
-            Here you have a semantic search on LLM-made summaries of the commits. It can provide more context and details about the code changes        
+            Here you have a semantic search on LLM-made summaries of the commits. It can provide more context and details about the code changes and the reasons behind them.    
         
         - Prefer to call more than one tool if you think it is necessary to answer the question. Use the examples below to understand how to think and act.       
         - If you are unsure about what tool to use, do a sequential call. Start call firstly `nl_to_sql_commit_context` to retrieve the information about the commit and then, with the provided info, call `commit_code` to have other possibly useful information.         
@@ -218,12 +251,22 @@ agent = create_react_agent(
         - "Summarize the changes made in the commit asdasfa." → use `nl_to_sql_commit_context`
         - "Can you explain what changes were made in the commit by Alice Smith on 2025-05-12?" → use `nl_to_sql_commit_context`
         - "What changed in commit Y?" → use `nl_to_sql_commit_context`
-        - "How does function X work?" → use `commit_code`  
+        - "How does function X work?" → use `semantic_code`  
+        - "How is it implemented the regex function in MuJS?" → use `semantic_code`
+        - "What does the function X do?" → use `semantic_code`
+        - "What is the purpose of the function Y?" → use `semantic_code`
+        - "What is inside the file X?" → use `semantic_code`
+        - "Summarize the code in the file X." → use `semantic_code`
+        - "How is implemented the Makefile?" → use `semantic_code`
+        - "What is inside the class Y?" → use `semantic_code`
+        - "How overflow is handled in MuJS?" → use `semantic_code`
         - "Show me the commits with related to the component/function Z." → use `commit_code`
         - "Are there any commits related to bug fixes?" → use `commit_code`
         - "Are there any commits related to this commit?" → use `commit_code`
+        - "Why was this change made?" → use `commit_code`
         - "Are there any commits related to the commit with hash asdsfa?" → 2 steps: use `nl_to_sql_commit_context` and then `commit_code`
         - "Summarize the changes made in the commit with hash asdsfa and add also its most probable related commits" → 2 steps: use `nl_to_sql_commit_context` and then `commit_code`
+        - "Describe me the file regex and its commits" → use `nl_to_sql_commit_context` and `semantic_code` (here you can call the tools in parallel)
         
         IMPORTANT:
         - The last two examples are sequential tool calls. This means that you must use the `nl_to_sql_commit_context` tool first to retrieve the commit details. 

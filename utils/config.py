@@ -10,6 +10,7 @@ CHROMA_METADATA = {"hnsw:space": "cosine"}
 CHROMA_PERSIST_DIR = "./chromadb_v1"
 COMMITS_COLLECTION_NAME = "commits"
 GENERAL_DOCS_COLLECTION_NAME = "general_docs"
+SEMANTIC_CODE_COLLECTION = "mujs_code_main"
 
 # SQLite
 SQL_PERSIST_DIR = "db_sqllite/sqlite.db"
@@ -18,6 +19,7 @@ SQL_PERSIST_DIR = "db_sqllite/sqlite.db"
 MUJS_REMOTE_URL = 'https://github.com/ccxvii/mujs.git'
 MUJS_LOCAL_PATH = './mujs'
 MUJS_DOCS_LOCAL_PATH = './mujs/docs'
+MUJS_BRANCH = "master"
 
 # Ollama
 OLLAMA_CLIENT_HOST = 'http://localhost:11434'
