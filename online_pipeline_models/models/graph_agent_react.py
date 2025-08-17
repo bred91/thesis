@@ -142,6 +142,14 @@ few_shots = [
     (
         "How many times the file `jsarray.c` was modified during the last year?",
         "SELECT COUNT(*) FROM commits WHERE files LIKE '%jsarray.c%' AND date >= date('now', '-1 year');"
+    ),
+    (
+        "When the file `jsarray.c` was added to the project?",
+        "SELECT date FROM commits WHERE files LIKE '%jsarray.c%' ORDER BY date LIMIT 1;"
+    ),
+    (
+        "Retrieve me the commit where the issue #123 was fixed.",
+        "SELECT * FROM commits WHERE message LIKE '%issue%123%' OR message LIKE '%fixes%123%' OR message LIKE '%resolved%123%';"
     )
 ]
 _examples = "\n".join(f"Question: {q}\nSQL: {s}" for q, s in few_shots)
