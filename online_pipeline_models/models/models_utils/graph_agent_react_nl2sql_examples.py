@@ -8,8 +8,12 @@ few_shots = [
         "SELECT commit_hash FROM commits WHERE author LIKE '%Alice%Smith%' OR author LIKE '%Smith%Alice%';"
     ),
     (
-        "Show the latest commit message for commit hash abcd1234.",
-        "SELECT message FROM commits WHERE commit_hash = 'abcd1234' LIMIT 1;"
+        "Show the latest commit message",
+        "SELECT message FROM commits ORDER BY date LIMIT 1;"
+    ),
+    (
+        "Retrieve the details of the commit with hash ef01dead",
+        "SELECT * FROM commits WHERE commit_hash LIKE '%ef01dead%';"
     ),
     (
         "Which author has contributed the highest number of commits?",
