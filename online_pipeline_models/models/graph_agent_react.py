@@ -172,6 +172,9 @@ sql_prompt = PromptTemplate(
         
         ⚠️  Reply **only** with the SQL query—no commentary, no ``` fencing.
         You can only do SELECT queries.
+        
+        Examples:        
+        {graph_agent_react_nl2sql_examples_examples}
 
         Question: {{question}}
         SQL:
