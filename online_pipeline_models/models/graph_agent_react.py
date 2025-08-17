@@ -232,7 +232,8 @@ checkpointer = InMemorySaver()
 agent = create_react_agent(
     model=llm,
     tools=[commit_code, general_project_info, nl_to_sql_commit_context],
-    prompt="""
+    prompt=f"""
+    Today is: {today_str}.
         You are a helpful assistant for the MuJS project.  
         - Use the `commit_code` tool to answer any question about code, source files, functions, code changes, commits or relationships between them.
         - Use the `general_project_info` tool only for questions about general project information, documentation, or high-level overviews.  
