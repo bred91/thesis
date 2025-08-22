@@ -21,6 +21,7 @@ from utils.enums import SummaryType
 from utils.file_utils import load_commits, save_commits, full_path
 from utils.git_utils import extract_git_commits, extract_mujs_docs
 from utils.logging_handler import SQLiteHandler
+from utils.semantic_code_utils import build_mujs_code_index
 from utils.sqlite_utils import save_commits_to_sqlite, save_summaries_to_sqlite, delete_all_summaries
 
 torch.manual_seed(SEED)
@@ -76,6 +77,9 @@ def main():
     general_docs: list[dict]  = extract_mujs_docs()
     for i, doc in enumerate(general_docs):
         save_general_document_to_chromadb({i: doc})
+
+    # process code documents
+    build_mujs_code_index()
 
     # process commits
     for i, (idx, commit) in tqdm(enumerate(commits_few_shots.items())):
