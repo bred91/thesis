@@ -44,10 +44,3 @@ def build_mujs_code_index():
     store.reset_collection()
     store.add_documents(docs)
     return store
-
-#todo: remove
-def main():
-    build_mujs_code_index()
-
-if __name__ == "__main__":
-    main()
