@@ -5,7 +5,7 @@ from langchain_chroma import Chroma
 from langchain_community.document_loaders.git import GitLoader
 from langchain_ollama import OllamaEmbeddings
 
-from utils.config import CHROMA_PERSIST_DIR, CHROMA_METADATA, MUJS_LOCAL_PATH, MUJS_BRANCH, \
+from utils.config import CHROMA_PERSIST_DIR, CHROMA_METADATA, MUJS_ABSOLUTE_PATH, MUJS_BRANCH, \
     SEMANTIC_CODE_COLLECTION, EMBEDDING_MODEL
 
 embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
@@ -13,7 +13,7 @@ embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
 
 def build_mujs_code_index():
     loader = GitLoader(
-        repo_path=MUJS_LOCAL_PATH,
+        repo_path=MUJS_ABSOLUTE_PATH,
         clone_url=None,
         branch=MUJS_BRANCH,
         file_filter=lambda fp: fp.endswith((".c", ".h", ".md")) or fp == "Makefile",
@@ -44,3 +44,11 @@ def build_mujs_code_index():
     store.reset_collection()
     store.add_documents(docs)
     return store
+
+#todo: remove
+def main():
+    build_mujs_code_index()
+
+
+if __name__ == "__main__":
+    main()

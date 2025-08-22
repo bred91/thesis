@@ -1,4 +1,6 @@
 # Model & Embeddings
+import os
+
 ONLINE_MODEL_NAME = "qwen3:8b"#"deepseek-r1:8b" #"llama3.1:8b-instruct-q8_0"
 OFFLINE_MODEL_NAME = "llama3.1:8b-instruct-q8_0"  # For offline use
 EMBEDDING_MODEL = "nomic-embed-text"
@@ -18,6 +20,7 @@ SQL_PERSIST_DIR = "db_sqllite/sqlite.db"
 # MuJS
 MUJS_REMOTE_URL = 'https://github.com/ccxvii/mujs.git'
 MUJS_LOCAL_PATH = './mujs'
+MUJS_ABSOLUTE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'mujs'))
 MUJS_DOCS_LOCAL_PATH = './mujs/docs'
 MUJS_BRANCH = "master"
 
