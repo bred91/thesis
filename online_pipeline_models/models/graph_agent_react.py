@@ -302,10 +302,13 @@ agent = create_react_agent(
         - "How is implemented the Makefile?" → use `semantic_code` with the file names wrapped §Makefile§ in the query
         - "What is inside the class Y?" → use `semantic_code`
         - "How overflow is handled in MuJS?" → use `semantic_code`
-        - "Show me the commits with related to the component/function Z." → use `commit_code`
+        - "Show me the code of the function X." → use `semantic_code`
+        - "Show me the commits related to the component/function Z." → use `commit_code`
         - "Are there any commits related to bug fixes?" → use `commit_code`
         - "Are there any commits related to this commit?" → use `commit_code`
         - "Why was this change made?" → use `commit_code`
+        - "Describe me the evolution of the changes related to regex functionality" → use `commit_code`
+        - "Describe me the evolution of the changes related to the function Y" → use `commit_code`
         - "Are there any commits related to the commit with hash asdsfa?" → 2 steps: use `nl_to_sql_commit_context` and then `commit_code`
         - "Summarize the changes made in the commit with hash asdsfa and add also its most probable related commits" → 2 steps: use `nl_to_sql_commit_context` and then `commit_code`
         - "Describe me the file regex and its commits" → use `nl_to_sql_commit_context` and `semantic_code` (here you can call the tools in parallel)
