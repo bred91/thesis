@@ -16,7 +16,7 @@ from online_pipeline_models.base_chat_pipeline import BaseChatPipeline
 from online_pipeline_models.models.models_utils.graph_agent_react_nl2sql_examples import \
     graph_agent_react_nl2sql_examples_examples
 from utils.config import ONLINE_MODEL_NAME, NUM_CTX, EMBEDDING_MODEL, COMMITS_COLLECTION_NAME, CHROMA_PERSIST_DIR, \
-    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, OFFLINE_MODEL_NAME, SEMANTIC_CODE_COLLECTION
+    GENERAL_DOCS_COLLECTION_NAME, CHROMA_METADATA, SQL_PERSIST_DIR, SEMANTIC_CODE_COLLECTION
 from utils.git_utils import format_code
 
 today_str = date.today().isoformat()
@@ -29,13 +29,6 @@ llm = ChatOllama(
     temperature=0.0,
     extract_reasoning=True
 )
-
-llm2 = ChatOllama(
-    model=OFFLINE_MODEL_NAME,
-    num_ctx=NUM_CTX,
-    temperature=0.0
-)
-
 embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL)
 
 # -------------------- Vector Stores --------------------
@@ -271,7 +264,7 @@ agent = create_react_agent(
         - Use the `semantic_code` tool to search and explain *current* source code (functions, structures, logic) in the master branch of MuJS.
             It is great for questions like: "What does function X do?" or "How is it implemented the regex function in MuJS?".
             It returns the code snippets and/or explanations about the code and the solution.
-            When you mention specific files, wrap them like §opnames.h§ or §opnames§ before calling this tool, so it can filter precisely by file_name or stem.
+            When you mention specific files, wrap them like §opnames.h§ or §opnames.c§ or §opnames§ before calling this tool, so it can filter precisely by file_name or stem.
             For functions, classes, or structures, no need to wrap them, just mention them directly in the query.
         - Use the `commit_code` tool to answer any question about code, source files, functions, code changes, commits or relationships between them. 
             Here you have a semantic search on LLM-made summaries of the commits. It can provide more context and details about the code changes and the reasons behind them.    
