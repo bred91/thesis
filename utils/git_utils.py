@@ -101,6 +101,6 @@ def format_code(doc):
     """
     path = doc.metadata.get("file_path", "<unknown>")
     content = doc.page_content.strip()
-    snippet = content[:10000] + ("..." if len(content) > 1000 else "")
+    snippet = content
 
     return f"FILE: {path}\n---\n{snippet}"
