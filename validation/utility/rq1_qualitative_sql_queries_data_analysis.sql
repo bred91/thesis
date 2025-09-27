@@ -27,7 +27,7 @@ FROM rq1_qualitative_evaluations
 WHERE summary_type = 'general' and evaluation_type = 'g_eval';
 --WHERE summary_type = 'technical';
 
--- Distribution of overall evaluation scores
+-- Distribution of evaluation scores (bins: [1,2), [2,3), [3,4), [4,5])
 SELECT 'accuracy' AS campo,
     CASE
         WHEN accuracy >= 1 AND accuracy < 2 THEN '1.00 ≤ x < 2.00'
