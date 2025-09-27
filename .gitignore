@@ -202,3 +202,8 @@ cython_debug/
 /.idea/vcs.xml
 /.idea/ai_toolkit.xml
 /.idea/data_source_mapping.xml
+/.idea/ai_debugger.xml
+/.idea/copilot.data.migration.agent.xml
+/.idea/copilot.data.migration.ask.xml
+/.idea/copilot.data.migration.ask2agent.xml
+/.idea/copilot.data.migration.edit.xml
