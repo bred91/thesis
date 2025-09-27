@@ -4,6 +4,7 @@ import numpy as np
 from utils.entities import DetailedRq1QuantitativeResults, Summary
 from utils.enums import SummaryType
 from utils.sqlite_utils import save_r1_quantitative_results
+from validation.utility.common_quantitative_utils import compute_detailed_scores
 
 # Metrics
 rouge = evaluate.load('rouge')
@@ -113,21 +114,6 @@ def compute_aggregated_scores(predictions_list, references_list):
     meteor_results = meteor.compute(predictions=predictions_list, references=references_list)
     return rouge_results, bleu_results, meteor_results
 
-def compute_detailed_scores(predictions_list, references_list, with_bert = False):
-    rouge_results_details = rouge.compute(predictions=predictions_list, references=references_list, use_aggregator=False)
-    bleu_results_details = [
-        bleu.compute(predictions=[p], references=[[r]])["bleu"]
-        for p, r in zip(predictions_list, references_list)
-    ]
-    meteor_results_details = [
-        meteor.compute(predictions=[p], references=[r])["meteor"]
-        for p, r in zip(predictions_list, references_list)
-    ]
-    if with_bert:
-        bert_score_results_details = bert_score.compute(predictions=predictions_list, references=references_list, lang="en")
-        return rouge_results_details, bleu_results_details, meteor_results_details, bert_score_results_details
-    else:
-        return rouge_results_details, bleu_results_details, meteor_results_details, None
 
 def append_detailed_results(detailed_results, commit_id, summary_type, rouge_1_result, rouge_2_result, rouge_l_result, bleu_result,
                             meteor_result, bert_precision=None, bert_recall=None, bert_f1=None):

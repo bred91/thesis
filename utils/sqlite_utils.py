@@ -3,7 +3,8 @@ import sqlite3
 from datetime import datetime
 
 from utils.config import SQL_PERSIST_DIR, OFFLINE_PIPELINE_TEST_NAME
-from utils.entities import Summary, Commit, DetailedRq1QuantitativeResults
+from utils.entities import Summary, Commit, DetailedRq1QuantitativeResults, QuestionAnswer, \
+    DetailedRq2QuantitativeResults
 from utils.logging_handler import SQLiteHandler
 
 db_handler = SQLiteHandler(SQL_PERSIST_DIR)
@@ -19,20 +20,20 @@ def save_commits_to_sqlite(commits):
     # Bulk insert of commits into the database
     cursor.executemany(
         """
-            INSERT OR IGNORE INTO commits (commit_hash, author, date, message, files, diffs)
-            VALUES (?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO commits (commit_hash, author, date, message, files, diffs)
+        VALUES (?, ?, ?, ?, ?, ?)
         """, [
-        (
-            commit.get("hash", ""),
-            commit.get("author", ""),
-            commit.get("date", "").strftime('%Y-%m-%d %H:%M:%S') if isinstance(commit.get("date"), datetime)
-                                    else commit.get("date", ""),
-            commit.get("message", ""),
-            json.dumps(commit['files']),
-            json.dumps(commit['diffs'])
-        )
-        for commit in commits.values()
-    ])
+            (
+                commit.get("hash", ""),
+                commit.get("author", ""),
+                commit.get("date", "").strftime('%Y-%m-%d %H:%M:%S') if isinstance(commit.get("date"), datetime)
+                else commit.get("date", ""),
+                commit.get("message", ""),
+                json.dumps(commit['files']),
+                json.dumps(commit['diffs'])
+            )
+            for commit in commits.values()
+        ])
 
     conn.commit()
     conn.close()
@@ -169,6 +170,7 @@ def retrieve_all_commits_to_be_validated() -> list[Commit]:
     conn.close()
     return commits
 
+
 def save_r1_quantitative_results(quantitative_results: list[DetailedRq1QuantitativeResults]) -> None:
     """
     Save a list of quantitative results to the SQLite database.
@@ -178,32 +180,33 @@ def save_r1_quantitative_results(quantitative_results: list[DetailedRq1Quantitat
 
     # Bulk insert of evaluations into the database
     cursor.executemany("""
-        INSERT INTO rq1_quantitative_evaluations (commit_id, exp_name, "date", summary_type, rouge_1, rouge_2, rouge_l, 
-                                                  bleu, meteor, bert_precision, bert_recall, bert_f1)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, [
-        (
-            result.commit_id,
-            OFFLINE_PIPELINE_TEST_NAME,
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            result.summary_type,
-            result.rouge_1,
-            result.rouge_2,
-            result.rouge_L,
-            result.bleu,
-            result.meteor,
-            result.bert_precision,
-            result.bert_recall,
-            result.bert_f1
-        )
-        for result in quantitative_results
-    ])
+                       INSERT INTO rq1_quantitative_evaluations (commit_id, exp_name, "date", summary_type, rouge_1,
+                                                                 rouge_2, rouge_l,
+                                                                 bleu, meteor, bert_precision, bert_recall, bert_f1)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       """, [
+                           (
+                               result.commit_id,
+                               OFFLINE_PIPELINE_TEST_NAME,
+                               datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                               result.summary_type,
+                               result.rouge_1,
+                               result.rouge_2,
+                               result.rouge_L,
+                               result.bleu,
+                               result.meteor,
+                               result.bert_precision,
+                               result.bert_recall,
+                               result.bert_f1
+                           )
+                           for result in quantitative_results
+                       ])
 
     conn.commit()
     conn.close()
 
 
-def save_g_evals(evaluation_list) -> None:
+def save_rq1_g_evals(evaluation_list) -> None:
     """
     Save a list of evaluations to the SQLite database.
     """
@@ -212,31 +215,31 @@ def save_g_evals(evaluation_list) -> None:
 
     # Bulk insert of evaluations into the database
     cursor.executemany("""
-        INSERT INTO rq1_qualitative_evaluations (commit_id, evaluation_type, exp_name, "date",
-                                        summary_type, accuracy,
-                                        completeness, usefulness, readability,
-                                        technological_depth, overall, justification,
-                                        error, raw_response)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, [
-            (
-                evaluation["commit_id"],
-                evaluation.get("evaluation_type", "g_eval"),
-                OFFLINE_PIPELINE_TEST_NAME,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                evaluation["summary_type"],
-                evaluation.get("accuracy", None),
-                evaluation.get("completeness", None),
-                evaluation.get("usefulness", None),
-                evaluation.get("readability", None),
-                evaluation.get("technical_depth", None),
-                evaluation.get("overall", None),
-                evaluation.get("justification", None),
-                evaluation.get("error", None),
-                evaluation.get("raw_response", None)
-            )
-            for evaluation in evaluation_list
-        ])
+                       INSERT INTO rq1_qualitative_evaluations (commit_id, evaluation_type, exp_name, "date",
+                                                                summary_type, accuracy,
+                                                                completeness, usefulness, readability,
+                                                                technological_depth, overall, justification,
+                                                                error, raw_response)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       """, [
+                           (
+                               evaluation["commit_id"],
+                               evaluation.get("evaluation_type", "g_eval"),
+                               OFFLINE_PIPELINE_TEST_NAME,
+                               datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                               evaluation["summary_type"],
+                               evaluation.get("accuracy", None),
+                               evaluation.get("completeness", None),
+                               evaluation.get("usefulness", None),
+                               evaluation.get("readability", None),
+                               evaluation.get("technical_depth", None),
+                               evaluation.get("overall", None),
+                               evaluation.get("justification", None),
+                               evaluation.get("error", None),
+                               evaluation.get("raw_response", None)
+                           )
+                           for evaluation in evaluation_list
+                       ])
 
     conn.commit()
     conn.close()
@@ -264,3 +267,164 @@ def retrieve_all_rq1_golden_standard() -> list[dict]:
 
     conn.close()
     return golden_standard
+
+
+def retrieve_all_rq2_questions_answers() -> list[QuestionAnswer]:
+    """
+    Retrieve all RQ2 questions and answers from the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+                   SELECT qa.id AS question_id,
+                          qa.question,
+                          a.id  AS answer_id,
+                          a.answer,
+                          a.answer_expected,
+                          a.tool_called,
+                          a.tool_expected,
+                          a.docs_retrieved,
+                          a.docs_expected,
+                          a.debug_text
+                   FROM rq2_questions AS qa
+                            LEFT JOIN rq2_answers AS a ON qa.id = a.question_id
+                   WHERE a.answer IS NOT NULL
+                   """)
+    rows = cursor.fetchall()
+
+    # Convert rows to a list of QuestionAnswer objects
+    questions_answers: list[QuestionAnswer] = []
+    for row in rows:
+        question_answer = QuestionAnswer(
+            question_id=row[0],
+            question=row[1],
+            answer_id=row[2],
+            answer=row[3],
+            answer_expected=row[4],
+            tool_called=row[5],
+            tool_expected=row[6],
+            docs_retrieved=row[7],
+            docs_expected=row[8],
+            debug_text=row[9]
+        )
+        questions_answers.append(question_answer)
+
+    conn.close()
+    return questions_answers
+
+
+def save_rq2_answer(question_id: int, answer: str) -> None:
+    """
+    Save an RQ2 answer to the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE rq2_answers SET answer_expected = ? WHERE question_id = ?",
+        (answer, question_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def save_rq2_qualitative_result(question_id: int, answer_id: int, evaluation_type: str, accuracy: int,
+                                completeness: int,
+                                usefulness: int, readability: int, overall: float, justification: str) -> None:
+    """
+    Save an RQ2 qualitative result to the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+                   INSERT INTO rq2_qualitative_evaluations (question_id, answer_id, evaluation_type, accuracy,
+                                                            completeness, usefulness, readability, overall,
+                                                            justification)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   """,
+                   (
+                       question_id,
+                       answer_id,
+                       evaluation_type,
+                       accuracy,
+                       completeness,
+                       usefulness,
+                       readability,
+                       overall,
+                       justification
+                   )
+                   )
+
+    conn.commit()
+    conn.close()
+
+
+def save_rq2_g_evals(evaluation_list) -> None:
+    """
+    Save a list of RQ2 G-Eval evaluations to the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    # Bulk insert of evaluations into the database
+    cursor.executemany("""
+                       INSERT INTO rq2_qualitative_evaluations (question_id, answer_id, evaluation_type, accuracy,
+                                                                completeness, usefulness, readability, overall,
+                                                                justification, is_hallucinated)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       """, [
+                           (
+                               evaluation["question_id"],
+                               evaluation["answer_id"],
+                               evaluation.get("evaluation_type", "g_eval"),
+                               evaluation.get("accuracy", None),
+                               evaluation.get("completeness", None),
+                               evaluation.get("usefulness", None),
+                               evaluation.get("readability", None),
+                               evaluation.get("overall", None),
+                               evaluation.get("justification", None),
+                               evaluation.get("is_hallucinated", None),
+                           )
+                           for evaluation in evaluation_list
+                       ])
+
+    conn.commit()
+    conn.close()
+
+
+def save_r2_quantitative_results(detailed_results: list[DetailedRq2QuantitativeResults]) -> None:
+    """
+    Save a list of RQ2 quantitative results to the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    # Bulk insert of evaluations into the database
+    cursor.executemany("""
+                       INSERT INTO rq2_quantitative_evaluations (question_id, answer_id, exp_name, "date", rouge_1,
+                                                                 rouge_2, rouge_l,
+                                                                 bleu, meteor, bert_precision, bert_recall, bert_f1)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       """, [
+                           (
+                               result.question_id,
+                               result.answer_id,
+                               OFFLINE_PIPELINE_TEST_NAME,
+                               datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                               result.rouge_1,
+                               result.rouge_2,
+                               result.rouge_L,
+                               result.bleu,
+                               result.meteor,
+                               result.bert_precision,
+                               result.bert_recall,
+                               result.bert_f1
+                           )
+                           for result in detailed_results
+                       ])
+
+    conn.commit()
+    conn.close()

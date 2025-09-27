@@ -6,9 +6,9 @@ from google.genai import types
 from pydantic import ValidationError
 
 from utils.config import SEED
-from utils.entities import Summary, Commit, DetailedScore
+from utils.entities import Summary, Commit, DetailedRq1Score
 from utils.enums import SummaryType
-from utils.sqlite_utils import save_g_evals
+from utils.sqlite_utils import save_rq1_g_evals
 
 client = genai.Client()
 
@@ -30,7 +30,7 @@ def calculate_save_rq1_g_eval(summaries: list[Summary], commits: list[Commit]) -
                                 generated_tech_summary)
 
     print("<---- Saving evaluations --->")
-    save_g_evals(general_summaries_evaluations + tech_summaries_evaluations)
+    save_rq1_g_evals(general_summaries_evaluations + tech_summaries_evaluations)
     print("<----------- End ----------->")
 
 
@@ -115,7 +115,7 @@ def generate_response(prompt):
         model="gemini-2.5-flash",
         contents=prompt,
         config=types.GenerateContentConfig(
-            response_schema=DetailedScore,
+            response_schema=DetailedRq1Score,
             response_mime_type="application/json",
             seed=SEED,
         )
@@ -124,7 +124,7 @@ def generate_response(prompt):
 
 def append_evaluation(commit_id: str, summaries_evaluations: list[dict], response, summary_type: SummaryType) -> None:
     try:
-        score = DetailedScore.model_validate_json(response.text)
+        score = DetailedRq1Score.model_validate_json(response.text)
 
         # Dimensions and overall score
         dims = [

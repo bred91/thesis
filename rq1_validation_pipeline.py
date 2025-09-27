@@ -12,11 +12,13 @@ def retrieve_summaries() -> list[Summary]:
     """
     return retrieve_all_summaries_to_be_validated()
 
+
 def retrieve_commits() -> list[Commit]:
     """
     Retrieve all commits from the SQLite database that are associated with the summaries to be validated.
     """
     return retrieve_all_commits_to_be_validated()
+
 
 def retrieve_rq1_golden_standard():
     """
@@ -35,6 +37,7 @@ def retrieve_rq1_golden_standard():
         res["technical"].append(gs["technical"])
     return res
 
+
 def main():
     # categorization
     validate_categorization()
@@ -48,6 +51,7 @@ def main():
     calculate_save_rq1_quantitative_evaluation(summaries, rq1_golden_standard, with_bert=True)
 
     calculate_save_rq1_g_eval(summaries, commits)
+
 
 if __name__ == "__main__":
     main()

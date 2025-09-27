@@ -2,7 +2,6 @@ import os
 import sqlite3
 from datetime import date
 from pathlib import Path
-from typing import Union
 
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
