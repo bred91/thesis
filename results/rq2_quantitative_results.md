@@ -62,20 +62,25 @@
 | bert_precision | 0.20 ≤ x < 0.40 | 0     |
 | bert_precision | 0.40 ≤ x < 0.60 | 0     |
 | bert_precision | 0.60 ≤ x < 0.80 | 5     |
-| bert_precision | 0.80 ≤ x ≤ 1.00 | 44    |
-| bert_precision | out_of_range    | 1     |
+| bert_precision | 0.80 ≤ x ≤ 1.00 | 45    |
+| bert_precision | out_of_range    | 0     |
 | bert_recall    | 0.00 ≤ x < 0.20 | 0     |
 | bert_recall    | 0.20 ≤ x < 0.40 | 0     |
 | bert_recall    | 0.40 ≤ x < 0.60 | 0     |
 | bert_recall    | 0.60 ≤ x < 0.80 | 3     |
-| bert_recall    | 0.80 ≤ x ≤ 1.00 | 46    |
-| bert_recall    | out_of_range    | 1     |
+| bert_recall    | 0.80 ≤ x ≤ 1.00 | 47    |
+| bert_recall    | out_of_range    | 0     |
 | bert_f1        | 0.00 ≤ x < 0.20 | 0     |
 | bert_f1        | 0.20 ≤ x < 0.40 | 0     |
 | bert_f1        | 0.40 ≤ x < 0.60 | 0     |
 | bert_f1        | 0.60 ≤ x < 0.80 | 1     |
-| bert_f1        | 0.80 ≤ x ≤ 1.00 | 48    |
-| bert_f1        | out_of_range    | 1     |
+| bert_f1        | 0.80 ≤ x ≤ 1.00 | 49    |
+| bert_f1        | out_of_range    | 0     |
+
+NOTE: 
+For one of the BERT metrics (Precision, Recall, F1), there was an instance where the value was extremely close to 1 (1.0000001192092896), which caused it to be counted in the "out_of_range" category due to strict inequality checks.
+This was likely due to floating-point precision issues.
+So I post-processed the results to exclude it from the "out_of_range" count and include it in the highest range bucket (0.80 ≤ x ≤ 1.00).
 
 ### Median & Quantiles
 | Metric         | 25° Quantile | Median | 75° Quantile |
