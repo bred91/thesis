@@ -428,3 +428,31 @@ def save_r2_quantitative_results(detailed_results: list[DetailedRq2QuantitativeR
 
     conn.commit()
     conn.close()
+
+
+def retrieve_rq2_hallucination_stats() -> list[dict]:
+    """
+    Retrieve the hallucination statistics for RQ2 from the SQLite database.
+    """
+    conn = sqlite3.connect(db_handler.db_path)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+                   SELECT evaluation_type, is_hallucinated, COUNT(*) AS count
+                   FROM rq2_qualitative_evaluations
+                   GROUP BY evaluation_type, is_hallucinated
+                   ORDER BY evaluation_type, is_hallucinated
+                   """)
+    rows = cursor.fetchall()
+
+    # Convert rows to a list of dictionaries
+    hallucination_stats = []
+    for row in rows:
+        hallucination_stats.append({
+            "evaluation_type": row[0],
+            "is_hallucinated": row[1],
+            "count": row[2]
+        })
+
+    conn.close()
+    return hallucination_stats

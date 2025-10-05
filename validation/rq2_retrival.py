@@ -1,6 +1,7 @@
 import evaluate
 
 from utils.entities import QuestionAnswer
+from utils.sqlite_utils import retrieve_rq2_hallucination_stats
 
 # Note: trec_eval supports only certain K values
 # ALLOWED_K -> {5,10,15,20,30,100,200,500,1000}
@@ -35,6 +36,7 @@ def _dedup_preserve_order(seq):
             seen.add(s)
             out.append(s)
     return out
+
 
 def evaluate_tool_called(called: list[str], expected: list[str]) -> str:
     """Evaluates the tool calls."""
@@ -120,3 +122,33 @@ def calculate_retrieval_and_tool_metrics(questions_answers: list[QuestionAnswer]
         print("\n=== TOOL DEBUG (KO / PARTIAL) ===")
         for d in sorted(tool_debug, key=lambda x: x["question_id"]):
             print(f"qid={d['question_id']} | status={d['status']} | called={d['called']} | expected={d['expected']}")
+
+
+def calculate_hallucination_rate() -> None:
+    hallucinations_list = retrieve_rq2_hallucination_stats()
+
+    g_eval = [d for d in hallucinations_list if d['evaluation_type'] == 'g_eval']
+    human = [d for d in hallucinations_list if d['evaluation_type'] == 'human']
+    other = [d for d in hallucinations_list if d['evaluation_type'] not in ['g_eval', 'human']]
+
+    if len(other) > 0:
+        print("WARNING: unexpected evaluation types found in hallucination rate calculation:")
+        print(other)
+
+    def print_hallucination_stats(data, label):
+        total = sum(d['count'] for d in data)
+        print(f"\n{label}-evaluated hallucination rates:")
+        print(f"  Total evaluations: {total}")
+        for is_hallucinated in ['YES', 'NO', 'PARTIALLY']:
+            count = sum(d['count'] for d in data if d['is_hallucinated'] == is_hallucinated)
+            rate = count / total if total > 0 else 0.0
+            print(f"    {is_hallucinated:<10}: {count:3d} ({rate:6.2%})")
+        total_hallucinated = sum(
+            d['count'] for d in data if d['is_hallucinated'] in ['YES', 'PARTIALLY']
+        )
+        print(
+            f"  Total hallucinated (YES + PARTIALLY): {total_hallucinated} ({(total_hallucinated / total):.2%})" if total > 0 else "  Total hallucinated (YES + PARTIALLY): 0 (0.00%)")
+
+    print("\n=== HALLUCINATION RATE ===")
+    print_hallucination_stats(human, "Human")
+    print_hallucination_stats(g_eval, "G-Eval")

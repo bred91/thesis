@@ -1,7 +1,7 @@
 from utils.sqlite_utils import retrieve_all_rq2_questions_answers
 from validation.rq2_g_eval import calculate_save_rq2_g_eval
 from validation.rq2_quantitative import calculate_save_rq2_quantitative_evaluation
-from validation.rq2_retrival import calculate_retrieval_and_tool_metrics
+from validation.rq2_retrival import calculate_retrieval_and_tool_metrics, calculate_hallucination_rate
 
 
 def main():
@@ -14,6 +14,8 @@ def main():
     calculate_save_rq2_g_eval(questions_answers)
 
     calculate_retrieval_and_tool_metrics(questions_answers)
+
+    calculate_hallucination_rate()
 
 
 if __name__ == "__main__":
