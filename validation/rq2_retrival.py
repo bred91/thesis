@@ -105,7 +105,7 @@ def calculate_retrieval_and_tool_metrics(questions_answers: list[QuestionAnswer]
     res = trec.compute(predictions=[run], references=[q_rel])
 
     print(f"=== RETRIVAL RESULTS (K={K}) ===")
-    print(f"P@{K}:    {res.get(f'P@{K}', None)}")
+    print(f"P@{K}:    {res.get(f'P@{K}', None):.4f}")
     print(f"NDCG@{K}: {res.get(f'NDCG@{K}', None):.4f}")
     print(f"MAP:      {res.get('map', None):.4f}")
     print(f"MRR:      {res.get('recip_rank', None):.4f}")
