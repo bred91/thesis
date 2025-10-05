@@ -55,6 +55,14 @@ KO = no expected tools called
 
 ## Hallucination Rate
 
+### Human-evaluated
+| Hallucination                        | Count | Percentage |
+|--------------------------------------|-------|------------|
+| YES                                  | 0     | 0.00%      |
+| PARTIALLY                            | 0     | 0.00%      |
+| NO                                   | 0     | 0.00%      |
+| Total Hallucinated (YES + PARTIALLY) | 0     | 0.00%      |
+
 ### G-Eval-evaluated
 | Hallucination                        | Count | Percentage |
 |--------------------------------------|-------|------------|

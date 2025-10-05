@@ -1,7 +1,5 @@
-import evaluate
 import numpy as np
 
-# TODO
 from utils.entities import DetailedRq2QuantitativeResults, QuestionAnswer
 from utils.sqlite_utils import save_r2_quantitative_results
 from validation.utility.common_quantitative_utils import compute_detailed_scores, rouge, bleu, meteor
