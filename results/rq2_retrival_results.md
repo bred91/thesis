@@ -1,7 +1,9 @@
 # RQ2 Retrival Results
 
 
-### Retrival (K=5)
+## Retrival 
+
+### (K=5)
 | Metric  | Value  |
 |---------|--------|
 | P@5     | 0.3810 |
@@ -9,7 +11,27 @@
 | MAP     | 0.8130 |
 | MRR     | 0.8847 |
 
-### Called Tools
+
+### (K=10)
+| Metric  | Value  |
+|---------|--------|
+| P@10    | 0.2476 |
+| NDCG@10 | 0.8518 |
+| MAP     | 0.8130 |
+| MRR     | 0.8847 |
+
+
+### (K=15)
+| Metric  | Value  |
+|---------|--------|
+| P@15    | 0.1730 |
+| NDCG@15 | 0.8509 |
+| MAP     | 0.8130 |
+| MRR     | 0.8847 |
+
+
+
+## Called Tools
 OK = all expected tools called
 PARTIAL = some expected tools called
 KO = no expected tools called
