@@ -11,7 +11,7 @@ trec = evaluate.load("trec_eval")
 
 
 def _parse_list(x):
-    """Parses a string or list into a list of strings."""
+    """Parses a string into a list of strings."""
     # None
     if x is None:
         return []
