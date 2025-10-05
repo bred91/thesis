@@ -51,3 +51,14 @@ KO = no expected tools called
 | qid=48 | status=PARTIAL | called=['nl_to_sql_commit_context']                | expected=['nl_to_sql_commit_context', 'commit_code'] |
 | qid=49 | status=PARTIAL | called=['nl_to_sql_commit_context']                | expected=['nl_to_sql_commit_context', 'commit_code'] |
 | qid=50 | status=PARTIAL | called=['nl_to_sql_commit_context']                | expected=['nl_to_sql_commit_context', 'commit_code'] |
+
+
+## Hallucination Rate
+
+### G-Eval-evaluated
+| Hallucination                        | Count | Percentage |
+|--------------------------------------|-------|------------|
+| YES                                  | 0     | 0.00%      |
+| PARTIALLY                            | 6     | 12.00%     |
+| NO                                   | 44    | 88.00%     |
+| Total Hallucinated (YES + PARTIALLY) | 6     | 12.00%     |
