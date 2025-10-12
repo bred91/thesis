@@ -15,6 +15,7 @@ query_general = """
     SELECT accuracy, completeness, usefulness, readability, overall
     FROM rq1_qualitative_evaluations
     WHERE summary_type = 'general' and evaluation_type = 'g_eval'
+        --and evaluation_type = 'human'
 """
 
 df_general = pd.read_sql_query(query_general, conn)
@@ -36,11 +37,12 @@ query_technical = """
     SELECT accuracy, completeness, usefulness, readability, technological_depth, overall
     FROM rq1_qualitative_evaluations
     WHERE summary_type = 'technical' and evaluation_type = 'g_eval'
+        --and evaluation_type = 'human'
 """
 
 df_technical = pd.read_sql_query(query_technical, conn)
 
-metrics_technical = ['accuracy', 'completeness', 'usefulness', 'readability', 'technical_depth', 'overall']
+metrics_technical = ['accuracy', 'completeness', 'usefulness', 'readability', 'technological_depth', 'overall']
 
 print("<---Technological Summary Metrics--->")
 for metric in metrics_technical:
