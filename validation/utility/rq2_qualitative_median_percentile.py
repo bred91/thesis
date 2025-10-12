@@ -10,6 +10,8 @@ DB_PATH = os.path.join(BASE_DIR, 'db_sqllite', 'sqlite.db')
 db_handler = SQLiteHandler(DB_PATH)
 conn = sqlite3.connect(db_handler.db_path)
 
+
+# G-EVAL Evaluations
 query_rq2_g_eval = """
     SELECT accuracy, completeness, usefulness, readability, overall
     FROM rq2_qualitative_evaluations
@@ -31,6 +33,7 @@ for metric in metrics:
             print(f"  {int(q*100)}° quantile: {serie.quantile(q):.2f}")
 
 
+# Human Evaluations
 query_rq2_human = """
     SELECT accuracy, completeness, usefulness, readability, overall
     FROM rq2_qualitative_evaluations
