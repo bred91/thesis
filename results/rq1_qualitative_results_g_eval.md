@@ -3,14 +3,12 @@
 
 ## General Summary results:
 ### Average
-
 | accuracy | completeness | usefulness | readability | overall |
 |----------|--------------|------------|-------------|---------|
 | 3.97     | 3.64         | 3.97       | 4.39        | 3.9925  |
 
 
 ### Min-Max
-
 | accuracy | completeness | usefulness | readability | overall |
 |----------|--------------|------------|-------------|---------|
 | 1 - 5    | 1 - 5        | 1 - 5      | 1 - 5       | 1 - 5   |
@@ -50,7 +48,9 @@
 | overall             | 4.00 ≤ x ≤ 5.00     | 68    |
 | overall             | out_of_range        | 0     |
 
+
 ### Median & Quantiles
+
 | Metric       | 25° Quantile | Median | 75° Quantile |
 |--------------|--------------|--------|--------------|
 | accuracy     | 3.00         | 5.00   | 5.00         |
@@ -63,7 +63,6 @@
 
 ## Technical Summary results:
 ### Average
-
 | accuracy | completeness | usefulness | readability | technological_depth | overall |
 |----------|--------------|------------|-------------|---------------------|---------|
 | 3.18     | 3.09         | 3.23       | 3.67        | 2.85                | 3.20    |
@@ -71,7 +70,6 @@
 
 
 ### Min-Max
-
 | accuracy | completeness | usefulness | readability | technological_depth | overall |
 |----------|--------------|------------|-------------|---------------------|---------|
 | 1 - 5    | 1 - 5        | 1 - 5      | 1 - 5       | 1 - 5               | 1 - 5   |
@@ -114,10 +112,11 @@
 
 
 ### Median & Quantiles
-| Metric       | 25° Quantile | Median | 75° Quantile |
-|--------------|--------------|--------|--------------|
-| accuracy     | 2.00         | 3.00   | 5.00         |
-| completeness | 2.00         | 3.00   | 4.00         |
-| usefulness   | 2.00         | 3.00   | 4.00         |
-| readability  | 3.00         | 4.00   | 4.00         |
-| overall      | 2.20         | 3.20   | 4.20         |
+| Metric              | 25° Quantile | Median | 75° Quantile |
+|---------------------|--------------|--------|--------------|
+| accuracy            | 2.00         | 3.00   | 5.00         |
+| completeness        | 2.00         | 3.00   | 4.00         |
+| usefulness          | 2.00         | 3.00   | 4.00         |
+| readability         | 3.00         | 4.00   | 4.00         |
+| technological_depth | 2.00         | 2.00   | 3.00         |
+| overall             | 2.20         | 3.20   | 4.20         |
