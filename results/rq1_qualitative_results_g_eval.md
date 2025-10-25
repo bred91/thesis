@@ -1,4 +1,4 @@
-# RQ1 Qualitative Evaluation
+# RQ1 Qualitative Evaluation G-Eval Results
 
 
 ## General Summary results:

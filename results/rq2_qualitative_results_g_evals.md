@@ -1,4 +1,4 @@
-# RQ2 Qualitative Evaluation
+# RQ2 Qualitative Evaluation G-Eval Results
 
 
 ### Average
