@@ -1,1 +1,46 @@
 # Git Data and LLMs for the Analysis and Improvement of Workflows and Code Reviews
+
+## Project Overview
+
+This repository contains the code of my master's thesis project at Polytechnic of Turin that explores how generative AI can enhance software development workflows and code review processes. <br> 
+The project investigates the use of Large Language Models (LLMs) to analyze Git repository data, with two main goals: 
+1) automatically summarizing Git commit history to capture the intent behind code changes
+2) generating contextualized project reports to improve team communication and understanding of a project's evolution. 
+
+In pursuit of these goals, the system leverages advanced AI techniques – including Retrieval-Augmented Generation (RAG) and a ReAct (Reason + Act) agent architecture – to ground LLM outputs in real project data. All relevant information (commit metadata, code, documentation, and generated summaries) is stored in structured SQL databases and vector databases, ensuring that the AI-driven summaries and answers remain factual and context-aware.
+
+## System Architecture
+
+The system is divided into two complementary pipelines that work together in an integrated flow:
+
+- **Offline Pipeline:** The offline pipeline is responsible for mining and synthesizing data from a Git repository. It performs commit extraction followed by data cleaning and **filtering out trivial commits**. Each commit is then automatically **categorized** (classified by type or scope) and summarized using an LLM. For every commit, the system generates two types of summaries: a **general summary** that describes the high-level intent of the change, and a **technical summary** that focuses on implementation details. These summaries are produced with a Retrieval-Augmented Generation approach – the LLM is provided with relevant context (such as code diffs, related documentation, or prior commits) retrieved from the project data to ensure accurate and informed summaries. The results of the offline pipeline (commit metadata, commit messages, summary texts, documentation, code snippets, etc.) are stored in a **relational database** (for structured query capabilities) and a **vector database** (for semantic search via embeddings). This curated knowledge base serves as the foundation for answering questions about the project.
+
+- **Online Pipeline:** The online pipeline implements an interactive **chatbot agent** that can answer natural language questions about the project using the data prepared by the offline pipeline. This agent uses the ReAct (Reason + Act) paradigm, which allows it to **plan multistep solutions** and dynamically invoke specialized tools to retrieve information. The agent is powered by an LLM and augmented with tools that interface with the project knowledge base: for example, it can query the commit summary vector index to find relevant commits, search the project’s documentation for specific topics, run SQL queries on the commits database for statistics or specific commit details, and even perform semantic searches on the codebase. Using these tools and a RAG mechanism, the agent gathers pertinent information and composes a coherent, contextual answer to the user’s query. This online Q&A pipeline provides developers and reviewers with a conversational interface to explore the history and status of the project, facilitating deeper insights and more informed code reviews.
+
+## Technologies Used
+
+- **Large Language Models (LLMs):** The project makes use of state-of-the-art LLMs in different roles. It employs *Llama 3.1 8B-Instruct* for offline tasks like commit classification and summarization, and *Qwen3-8B* as the core of the online question-answering agent. These models were chosen for their relatively lightweight size (around 8 billion parameters), enabling experimentation on a single GPU while still providing strong language understanding and generation capabilities.
+
+- **Retrieval-Augmented Generation (RAG):** RAG techniques are used to ground the LLMs’ outputs in actual repository data. Relevant context from the code, commit history, and documentation is retrieved (using vector similarity search or database queries) and fed into the model prompts for summarization and Q&A. This helps ensure that generated summaries and answers are accurate, up-to-date, and specific to the project at hand, rather than purely generic or hallucinated.
+
+- **ReAct Agentic Architecture:** The online chatbot follows a ReAct approach, which combines reasoning and acting. The LLM agent can reason about what information is needed to answer a question and choose from a set of actions (tools) to gather that information. This agentic framework enables the system to handle complex queries by breaking them down into steps – for example, formulating a database query, retrieving a relevant code snippet, or looking up a commit message – and then integrating the results to produce a final answer.
+
+- **Databases (SQL & Vector Stores):** The system uses a **relational SQL database** (SQLite) to store structured data such as commit metadata, commit messages, and summary text, allowing for direct queries and aggregations (e.g. filtering commits by author or date). In addition, a **vector database** (Chroma or similar) stores embeddings of various artifacts: commit summaries, source code, and documentation. This enables semantic searches – the agent can find related items based on meaning or similarity, rather than exact keyword matching. Together, these storage components form a hybrid knowledge base that the LLMs can draw from.
+
+- **Evaluation Metrics & Tools:** The project was evaluated using both quantitative metrics and qualitative assessments. For the generated commit summaries and answers, standard NLP evaluation metrics were calculated: **ROUGE, BLEU, METEOR, and BERTScore** were used to measure the fidelity and relevance of the summaries against reference answers or expected content. Beyond these, the quality of the results was also assessed with **G-Eval** (an LLM-based evaluation framework) and through **human judgments**. Human reviewers and an AI evaluator judged aspects like correctness, completeness, and clarity of the summaries and responses. This multi-faceted evaluation helped validate the effectiveness of using LLMs for commit summarization and workflow improvement.
+
+## Repository Structure and Usage
+
+The repository is organized into directories corresponding to the offline pipeline, online pipeline, and evaluation components. Key locations include:
+
+- **`pipeline/offline/`** – Contains the logic and scripts for the offline pipeline. This includes Git data extraction utilities, commit filtering and normalization functions, classification routines, and the LLM-based summarization code for generating general and technical commit summaries. It also contains code to populate the relational database and vector store with commits, documentation, and code embeddings.
+
+- **`pipeline/online/`** – Contains the implementation of the online chatbot agent and its tools. Here you will find the ReAct agent framework and the definitions of various tools (e.g., commit search, documentation search, natural language to SQL translator, semantic code search) that the agent can use to retrieve information. This section also includes code to initialize the LLM for the agent (Qwen3-8B) and to orchestrate the question-answering dialogue loop. Running the online pipeline (for example, via an interactive CLI) allows you to ask natural language questions about the project and get answers powered by the agent.
+
+- **`pipeline/validation/`** – Contains evaluation and validation scripts, experiments, and metrics calculation logic. This includes scripts used to reproduce the quantitative evaluations (such as computing ROUGE/BLEU/METEOR/BERTScore on summary outputs) and those for qualitative assessments (e.g., interfacing with G-Eval or aggregating human feedback results). The contents of this directory were used to validate the performance of the system against the thesis research questions (RQ1 and RQ2).
+
+- **`requirements.txt`** – Lists the Python dependencies and libraries required to run the project. This includes LLM frameworks, database connectors, and other utilities (for example, LangChain and Ollama for model hosting, Chroma for vector storage, etc.). Installing these requirements will set up the environment needed to execute the offline and online pipelines.
+
+## Disclaimer
+
+This codebase was developed as part of my academic **Master’s thesis project (completed in December 2025)**. It is provided here for illustrative and archival purposes. Please note that the repository is **not intended for active development or public reuse**. The system was a research prototype, so there may be rough edges or configuration steps specific to the thesis case study. No ongoing maintenance is planned. Use of the code or ideas is at your own discretion, and any adaptation for other projects will likely require additional engineering and testing.
